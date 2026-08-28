@@ -1,7 +1,7 @@
 import { ArrowUpRight, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-export default function ToolCard({ tool }) {
+export default function ToolCard({ tool, favorite = false, onToggleFavorite }) {
   const Icon = tool.icon
 
   return (
@@ -16,8 +16,14 @@ export default function ToolCard({ tool }) {
         </span>
         <ArrowUpRight className="tool-arrow" aria-hidden="true" size={19} />
       </Link>
-      <button className="favorite-button" type="button" aria-label={`收藏${tool.name}`} disabled>
-        <Star size={19} />
+      <button
+        className={`favorite-button${favorite ? ' is-favorite' : ''}`}
+        type="button"
+        aria-label={favorite ? `取消收藏${tool.name}` : `收藏${tool.name}`}
+        aria-pressed={favorite}
+        onClick={() => onToggleFavorite?.(tool.id)}
+      >
+        <Star size={19} fill={favorite ? 'currentColor' : 'none'} />
       </button>
     </article>
   )

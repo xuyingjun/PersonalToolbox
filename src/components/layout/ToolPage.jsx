@@ -1,7 +1,7 @@
-import { ArrowLeft, Construction } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-export default function ToolPage({ name, description, icon: Icon }) {
+export default function ToolPage({ name, icon: Icon, actions, children }) {
   return (
     <div className="tool-page">
       <header className="tool-header">
@@ -12,15 +12,9 @@ export default function ToolPage({ name, description, icon: Icon }) {
           <Icon size={20} />
         </span>
         <h1>{name}</h1>
+        {actions && <div className="tool-header-actions">{actions}</div>}
       </header>
-      <main className="tool-page-content">
-        <div className="phase-placeholder">
-          <Construction aria-hidden="true" size={26} />
-          <h2>入口已经准备好</h2>
-          <p>{description}</p>
-          <span>具体功能将在对应开发阶段接入本地数据层。</span>
-        </div>
-      </main>
+      <main className="tool-page-content">{children}</main>
     </div>
   )
 }

@@ -668,3 +668,7 @@ v0.1 只有同时满足以下条件才算完成：
 8. 不新增不必要依赖，不引入后端、AI 或云同步。
 9. 补充对应测试并执行 `npm run build`。
 10. 修复与本次新增工具有关的编译错误后再交付。
+
+## PC端测试链接
+
+https://xuyingjun.github.io/PersonalToolbox/

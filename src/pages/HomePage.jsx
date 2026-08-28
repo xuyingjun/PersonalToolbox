@@ -2,15 +2,24 @@ import { Search, Wrench, X } from 'lucide-react'
 import { useDeferredValue, useState } from 'react'
 import { enabledTools, toolCategories } from '../app/toolRegistry.js'
 import ToolCard from '../components/ui/ToolCard.jsx'
+import { useLiveData } from '../hooks/useLiveData.js'
+import { getFavorites, toggleFavorite } from '../services/favoritesService.js'
+import { getRecentToolUsage } from '../services/toolUsageService.js'
 
 function matchesSearch(tool, query) {
-  const searchableText = [tool.name, tool.description, tool.category, ...tool.keywords].join(' ')
+  const searchableText = [tool.name, tool.description, tool.category, ...(tool.keywords ?? [])].join(' ')
   return searchableText.toLocaleLowerCase('zh-CN').includes(query.toLocaleLowerCase('zh-CN'))
 }
 
 export default function HomePage() {
   const [query, setQuery] = useState('')
   const deferredQuery = useDeferredValue(query.trim())
+  const { data: favorites } = useLiveData(getFavorites)
+  const { data: recentUsage } = useLiveData(() => getRecentToolUsage(4))
+  const favoriteIds = new Set(favorites.map((favorite) => favorite.toolId))
+  const recentTools = recentUsage
+    .map((usage) => enabledTools.find((tool) => tool.id === usage.toolId))
+    .filter(Boolean)
   const visibleTools = deferredQuery
     ? enabledTools.filter((tool) => matchesSearch(tool, deferredQuery))
     : enabledTools
@@ -44,6 +53,17 @@ export default function HomePage() {
         )}
       </label>
 
+      {!deferredQuery && recentTools.length > 0 && (
+        <section className="tool-section recent-section">
+          <div className="section-heading"><h2>最近使用</h2><span>最多 4 个</span></div>
+          <div className="tool-list">
+            {recentTools.map((tool) => (
+              <ToolCard key={tool.id} tool={tool} favorite={favoriteIds.has(tool.id)} onToggleFavorite={toggleFavorite} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {visibleTools.length > 0 ? (
         <div className="category-list">
           {toolCategories.map((category) => {
@@ -58,7 +78,7 @@ export default function HomePage() {
                 </div>
                 <div className="tool-list">
                   {categoryTools.map((tool) => (
-                    <ToolCard key={tool.id} tool={tool} />
+                    <ToolCard key={tool.id} tool={tool} favorite={favoriteIds.has(tool.id)} onToggleFavorite={toggleFavorite} />
                   ))}
                 </div>
               </section>

@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/personal-toolbox/',
+  base: '/PersonalToolbox/',
   plugins: [
     react(),
     tailwindcss(),
@@ -15,8 +15,8 @@ export default defineConfig({
         name: '我的个人工具箱',
         short_name: '工具箱',
         description: '面向个人日常使用的本地优先工具箱',
-        start_url: '/personal-toolbox/',
-        scope: '/personal-toolbox/',
+        start_url: '/PersonalToolbox/',
+        scope: '/PersonalToolbox/',
         display: 'standalone',
         background_color: '#f7f6f2',
         theme_color: '#f7f6f2',

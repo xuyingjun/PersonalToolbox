@@ -1,4 +1,4 @@
-import { Search, Toolbox, X } from 'lucide-react'
+import { Search, Wrench, X } from 'lucide-react'
 import { useDeferredValue, useState } from 'react'
 import { enabledTools, toolCategories } from '../app/toolRegistry.js'
 import ToolCard from '../components/ui/ToolCard.jsx'
@@ -19,7 +19,7 @@ export default function HomePage() {
     <div className="page home-page">
       <header className="home-header">
         <span className="brand-mark" aria-hidden="true">
-          <Toolbox size={24} strokeWidth={1.8} />
+          <Wrench size={24} strokeWidth={1.8} />
         </span>
         <div>
           <p>Personal Toolbox</p>

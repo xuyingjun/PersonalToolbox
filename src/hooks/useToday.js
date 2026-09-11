@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { toLocalDateString } from '../utils/date.js'
+import { formatLocalDate } from '../utils/date.js'
 
 export function useToday() {
-  const [today, setToday] = useState(() => toLocalDateString())
+  const [today, setToday] = useState(() => formatLocalDate())
 
   useEffect(() => {
-    const refresh = () => setToday(toLocalDateString())
+    const refresh = () => setToday(formatLocalDate())
     const interval = window.setInterval(refresh, 60_000)
     document.addEventListener('visibilitychange', refresh)
     window.addEventListener('focus', refresh)

@@ -30,4 +30,11 @@ export default defineConfig([
       },
     },
   },
+  {
+    // Node 侧文件：构建脚本与 node --test 测试
+    files: ['scripts/**/*.mjs', 'test/**/*.js', 'test-helpers/**/*.js', 'src/**/*.test.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])

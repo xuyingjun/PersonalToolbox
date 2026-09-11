@@ -1,39 +1,39 @@
-# 我的个人工具箱
+# LastTime
 
-一个面向 iPhone、数据保存在本机的个人工具 PWA。它提供统一的工具入口、搜索、收藏和最近使用记录，也可以安装到主屏幕并在离线状态下打开。
+记录生活中那些“最后一次”的时刻。
 
-在线访问：[Personal Toolbox](https://xuyingjun.github.io/PersonalToolbox/)
+LastTime 是一个独立的个人周期性事务记录 PWA。记录一件事情最后一次发生的时间，并根据历史记录和用户设置的周期，告诉用户下一次大概什么时候需要关注。
+
+在线访问：[LastTime](https://xuyingjun.github.io/PersonalToolbox/)
+
+## 核心概念
+
+```text
+Item  = 我关注什么（洗牙、换机油、清理空调……）
+Event = 它什么时候真实发生过
+Cycle = 我认为多久应该发生一次
+
+LatestEvent / NextDate / Status / Statistics 全部动态计算，不保存到数据库。
+```
 
 ## 功能
 
-### 最后一次
+- **需要关注**：首页第一眼展示已过期、今天到期、即将到期的事项
+- **今天做了**：一键记录今天发生过，同一天自动去重
+- **周期**：每天 / 每周 / 每两周 / 每月 / 每季度 / 每半年 / 每年 / 自定义天数
+- **历史记录**：每次发生的日期与备注，可增改删
+- **轻量统计**：记录次数、平均/最长/最短间隔（不足两次不显示无意义数据）
+- **搜索与排序**：按名称、分类、备注搜索；四种排序
+- **数据管理**：JSON 导出 / 校验导入（覆盖模式）、旧“个人工具箱”数据一键迁移
+- **分类管理**：默认 8 个分类，可增改删（被引用的分类不可删除）
+- **外观**：跟随系统 / 浅色 / 深色
 
-- 记录某件事上一次发生的日期和备注
-- 显示已经过去的本地自然日天数
-- 支持新增、编辑、删除、搜索和排序
-- 可通过“今天做了”快速更新日期
+## 设计原则
 
-### 倒计时
-
-- 记录重要日期和备注
-- 显示剩余天数、当天状态或逾期天数
-- 支持新增、编辑和删除
-- 按目标日期从近到远排列
-
-### 灵感记录
-
-- 快速保存想法和多个标签
-- 支持编辑、删除、内容与标签搜索
-- 可按创建时间或更新时间排序
-
-### 公共能力
-
-- 工具搜索、收藏和最近使用
-- 跟随系统、浅色、深色三种外观模式
-- 使用 IndexedDB 在浏览器本机持久化数据
-- 导出 JSON 备份、校验并覆盖恢复数据
-- PWA 离线访问和新版本更新提示
-- iPhone 安全区域与移动端布局适配
+- Local First：数据全部保存在浏览器 IndexedDB（`LastTimeDB`），无需登录
+- 无后端、无 AI、无云同步、无第三方 API
+- 移动优先（375 / 390 / 430 宽），最大内容宽度 480px，支持 iPhone Safe Area
+- 派生数据（lastDate / nextDate / status / statistics）绝不落库
 
 ## iPhone 安装
 
@@ -58,10 +58,10 @@ npm run dev
 
 ```bash
 npm run dev      # 启动开发服务器
-npm test         # 运行日期规则测试
+npm test         # 运行全部测试（日期 / 状态 / 服务 / 备份 / 迁移）
 npm run lint     # 运行 ESLint
-npm run build    # 创建生产构建
-npm run preview  # 预览生产构建
+npm run build    # 创建生产构建（prebuild 自动生成 PWA 图标）
+npm run preview  # 预览生产构建（含 Service Worker，开发模式下 SW 默认关闭）
 ```
 
 ## 技术栈
@@ -72,36 +72,47 @@ npm run preview  # 预览生产构建
 - Dexie 与 IndexedDB
 - Lucide React
 - vite-plugin-pwa
+- Node.js 内置测试运行器 + fake-indexeddb
 
 ## 项目结构
 
 ```text
 src/
-  app/          # 工具注册表
-  components/   # 公共布局与 UI
-  db/           # Dexie 数据库和 schema
-  hooks/        # 实时数据和日期刷新 hooks
-  pages/        # 首页、收藏、设置
-  services/     # 备份、收藏、设置、最近使用
-  tools/        # 最后一次、倒计时、灵感记录
-  utils/        # 本地自然日工具
-test/           # Node.js 测试
+  components/   # 通用组件（ItemCard、StatusBadge、CycleSelector、Sheet/Dialog 等）
+  db/           # LastTimeDB：schema、实例、默认分类播种
+  hooks/        # useToday、useLiveData（Dexie liveQuery）、useItemViewModels
+  pages/        # 首页 / 全部 / 新增编辑 / 详情 / 设置
+  services/     # item / event / category / statistics / status / viewModel / backup / migration / settings
+  utils/        # 本地自然日工具（唯一日期计算入口）
+test/           # Node.js 测试（数据层）
+test-helpers/   # 测试基础设施（fake-indexeddb 注入）
+scripts/        # 零依赖 PWA 图标生成器
 ```
 
-工具展示信息集中在 `src/app/toolRegistry.js`。新增工具时，需要创建独立工具模块，并在注册表和应用路由中注册。
+架构纪律：
+
+- UI 不直接操作 Dexie：Component → Service → Dexie
+- 所有日期计算统一走 `src/utils/date.js`，禁止 `new Date('YYYY-MM-DD')` 业务计算
+- 列表页一次读取三表，ViewModel 在内存中推导，无 N+1 查询
 
 ## 数据与隐私
 
-所有业务数据默认只保存在当前浏览器的 IndexedDB 中，不会上传到服务器，也没有账号或云同步功能。
+所有业务数据只保存在当前浏览器的 IndexedDB 中，不会上传到服务器，也没有账号或云同步功能。
 
-清理浏览器网站数据、卸载 PWA 或系统存储回收都可能删除本机数据。请在“设置 > 数据”中定期导出 JSON 备份，并妥善保管包含私人内容的备份文件。导入采用覆盖模式，确认后会替换当前全部数据。
+清理浏览器网站数据、卸载 PWA 或系统存储回收都可能删除本机数据。请在“设置 > 数据管理”中定期导出 JSON 备份，并妥善保管包含私人内容的备份文件。导入采用覆盖模式，确认后会替换当前全部数据。
+
+旧版“个人工具箱”的 `lastTimeRecords` 数据可在“设置 > 数据管理”中一键迁移（幂等，不删除旧库）。
 
 ## 部署
 
-项目通过 GitHub Actions 构建并部署到 GitHub Pages。Vite 生产基础路径为 `/PersonalToolbox/`，页面路由使用 HashRouter，避免刷新工具页面时出现 404。
+项目通过 GitHub Actions 构建并部署到 GitHub Pages。Vite 生产基础路径为 `/PersonalToolbox/`，页面路由使用 HashRouter，避免刷新时出现 404。
+
+> 注意：需求文档规定基础路径为 `/last-time/`。当前仓库名为 PersonalToolbox，
+> 为保持一致暂时使用 `/PersonalToolbox/`；若将仓库改名为 `last-time`，
+> 需同步修改 `vite.config.js`、`index.html` 中的路径。
 
 推送到 `main` 分支后，工作流会依次安装依赖、运行测试和 ESLint、构建应用并发布 `dist` 目录。
 
 ## 版本
 
-当前版本：0.1.0
+当前版本：1.0.0

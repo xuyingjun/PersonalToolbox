@@ -10,11 +10,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['apple-touch-icon.png'],
+      includeAssets: ['apple-touch-icon.png', 'favicon.svg'],
       manifest: {
-        name: '我的个人工具箱',
-        short_name: '工具箱',
-        description: '面向个人日常使用的本地优先工具箱',
+        name: 'LastTime',
+        short_name: 'LastTime',
+        description: '个人周期性事务记录工具',
         start_url: '/PersonalToolbox/',
         scope: '/PersonalToolbox/',
         display: 'standalone',
@@ -22,22 +22,9 @@ export default defineConfig({
         theme_color: '#f6f8f8',
         lang: 'zh-CN',
         icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

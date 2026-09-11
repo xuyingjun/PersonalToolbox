@@ -1,16 +1,26 @@
-import { db } from '../db/database.js'
-import { parseLocalDate } from '../utils/date.js'
+import { db } from '../db/db.js'
+import { CYCLE_TYPES } from '../db/schema.js'
+import { DEFAULT_CATEGORIES } from '../db/seed.js'
+import { getTodayString, parseLocalDate } from '../utils/date.js'
+import { VALID_THEMES } from './settingsService.js'
 
-const BACKUP_VERSION = 1
+const BACKUP_APP = 'LastTime'
+const BACKUP_VERSION = '1.0'
 const MAX_BACKUP_SIZE = 5 * 1024 * 1024
-const TABLE_NAMES = [
-  'lastTimeRecords',
-  'countdowns',
-  'inspirations',
-  'favorites',
-  'toolUsage',
-  'settings',
-]
+const TABLE_NAMES = ['items', 'events', 'categories', 'settings']
+
+// 导入时逐行清洗：只保留白名单字段，剥离多余/未知字段
+const FIELDS = {
+  items: ['id', 'name', 'categoryId', 'cycleType', 'cycleValue', 'note', 'createdAt', 'updatedAt'],
+  events: ['id', 'itemId', 'eventDate', 'note', 'createdAt', 'updatedAt'],
+  categories: ['id', 'name', 'sortOrder', 'createdAt', 'updatedAt'],
+  settings: ['key', 'value'],
+}
+
+function sanitizeRows(table, rows) {
+  const fields = FIELDS[table]
+  return rows.map((row) => Object.fromEntries(fields.map((field) => [field, row[field]])))
+}
 
 function assertArray(value, name) {
   if (!Array.isArray(value)) throw new Error(`备份中的 ${name} 格式不正确。`)
@@ -40,49 +50,71 @@ function assertRecordBase(record, name) {
 }
 
 function validateRows(backup) {
-  backup.lastTimeRecords.forEach((record) => {
-    assertRecordBase(record, '最后一次记录')
+  backup.items.forEach((record) => {
+    assertRecordBase(record, '事项')
     assertText(record.name, '事项名称', 80)
-    assertText(record.note, '事项备注', 500, true)
-    if (!parseLocalDate(record.lastDate)) throw new Error('备份中的上一次日期格式不正确。')
-  })
-  backup.countdowns.forEach((record) => {
-    assertRecordBase(record, '倒计时记录')
-    assertText(record.name, '倒计时名称', 80)
-    assertText(record.note, '倒计时备注', 500, true)
-    if (!parseLocalDate(record.targetDate)) throw new Error('备份中的目标日期格式不正确。')
-  })
-  backup.inspirations.forEach((record) => {
-    assertRecordBase(record, '灵感记录')
-    assertText(record.content, '灵感内容', 2000)
-    if (!Array.isArray(record.tags) || record.tags.length > 10 || record.tags.some((tag) => typeof tag !== 'string' || !tag || tag.length > 30)) {
-      throw new Error('备份中的灵感标签格式不正确。')
+    assertText(record.note ?? '', '事项备注', 500, true)
+    assertText(record.categoryId, '事项分类', 40)
+    if (!CYCLE_TYPES.includes(record.cycleType)) throw new Error('备份中的周期格式不正确。')
+    if (record.cycleType === 'custom') {
+      if (!Number.isInteger(record.cycleValue) || record.cycleValue <= 0) throw new Error('备份中的周期天数格式不正确。')
+    } else if (record.cycleValue != null) {
+      throw new Error('备份中的周期值格式不正确。')
     }
   })
-  backup.favorites.forEach((record) => {
-    if (!isIsoTimestamp(record.createdAt)) throw new Error('备份中的收藏时间格式不正确。')
+
+  backup.events.forEach((record) => {
+    assertRecordBase(record, '记录')
+    assertText(record.itemId, '记录归属', 40)
+    if (!parseLocalDate(record.eventDate)) throw new Error('备份中的发生日期格式不正确。')
+    assertText(record.note ?? '', '记录备注', 500, true)
   })
-  backup.toolUsage.forEach((record) => {
-    if (!isIsoTimestamp(record.lastUsedAt)) throw new Error('备份中的最近使用时间格式不正确。')
+
+  backup.categories.forEach((record) => {
+    assertRecordBase(record, '分类')
+    assertText(record.name, '分类名称', 20)
+    if (!Number.isInteger(record.sortOrder)) throw new Error('备份中的分类排序格式不正确。')
   })
+
   backup.settings.forEach((record) => {
-    if (!record || typeof record !== 'object' || Array.isArray(record) || !('value' in record)) throw new Error('备份中的设置格式不正确。')
+    if (!record || typeof record !== 'object' || Array.isArray(record)) throw new Error('备份中的设置格式不正确。')
+    assertText(record.key, '设置键', 60)
+    if (!('value' in record)) throw new Error('备份中的设置格式不正确。')
+    if (record.key === 'theme' && !VALID_THEMES.includes(record.value)) throw new Error('备份中的主题设置格式不正确。')
   })
+}
+
+function validateReferences(backup) {
+  const itemIds = new Set(backup.items.map((record) => record.id))
+  const categoryIds = new Set(backup.categories.map((record) => record.id))
+
+  if (categoryIds.size === 0 && backup.items.length > 0) throw new Error('备份中的分类数据缺失。')
+
+  for (const record of backup.events) {
+    if (!itemIds.has(record.itemId)) throw new Error('备份中存在无效的事项记录引用。')
+  }
+  for (const record of backup.items) {
+    if (!categoryIds.has(record.categoryId)) throw new Error('备份中存在无效的分类引用。')
+  }
 }
 
 export function validateBackup(backup) {
   if (!backup || typeof backup !== 'object' || Array.isArray(backup)) throw new Error('这不是有效的备份文件。')
-  if (!Number.isInteger(backup.version)) throw new Error('备份缺少版本信息。')
-  if (backup.version > BACKUP_VERSION) throw new Error('备份来自更高版本的应用，当前版本无法导入。')
+  if (backup.app !== BACKUP_APP) throw new Error('这不是 LastTime 的备份文件。')
+  if (typeof backup.version !== 'string') throw new Error('备份缺少版本信息。')
+  if (parseFloat(backup.version) > parseFloat(BACKUP_VERSION)) {
+    throw new Error('备份来自更高版本的应用，当前版本无法导入。')
+  }
+  if (backup.version !== BACKUP_VERSION) throw new Error('备份版本格式不正确。')
+  if (!isIsoTimestamp(backup.exportedAt)) throw new Error('备份的导出时间格式不正确。')
 
   TABLE_NAMES.forEach((name) => assertArray(backup[name], name))
-  assertUniqueIds(backup.lastTimeRecords, 'id', '最后一次记录')
-  assertUniqueIds(backup.countdowns, 'id', '倒计时记录')
-  assertUniqueIds(backup.inspirations, 'id', '灵感记录')
-  assertUniqueIds(backup.favorites, 'toolId', '收藏记录')
-  assertUniqueIds(backup.toolUsage, 'toolId', '最近使用记录')
-  assertUniqueIds(backup.settings, 'key', '设置记录')
+  assertUniqueIds(backup.items, 'id', '事项')
+  assertUniqueIds(backup.events, 'id', '记录')
+  assertUniqueIds(backup.categories, 'id', '分类')
+  assertUniqueIds(backup.settings, 'key', '设置')
   validateRows(backup)
+  validateReferences(backup)
 
   return backup
 }
@@ -94,8 +126,8 @@ export async function createBackup() {
   })
 
   return {
+    app: BACKUP_APP,
     version: BACKUP_VERSION,
-    appVersion: '0.1.0',
     exportedAt: new Date().toISOString(),
     ...data,
   }
@@ -103,10 +135,11 @@ export async function createBackup() {
 
 export async function exportBackup() {
   const json = JSON.stringify(await createBackup(), null, 2)
-  const file = new File([json], 'personal-toolbox-backup.json', { type: 'application/json' })
+  const file = new File([json], `LastTime-backup-${getTodayString()}.json`, { type: 'application/json' })
 
+  // iOS 优先走系统分享面板，桌面走 <a download>
   if (navigator.share && navigator.canShare?.({ files: [file] })) {
-    await navigator.share({ files: [file], title: '我的个人工具箱备份' })
+    await navigator.share({ files: [file], title: 'LastTime 数据备份' })
     return
   }
 
@@ -130,18 +163,26 @@ export async function readBackupFile(file) {
   return validateBackup(parsed)
 }
 
+// 覆盖式导入：单事务清空并写入，任何一步失败 Dexie 整体回滚。
+// meta 不参与导入；categories 为空时在同一事务内补种默认分类。
 export async function restoreBackup(backup) {
   validateBackup(backup)
   await db.transaction('rw', TABLE_NAMES.map((name) => db[name]), async () => {
     for (const name of TABLE_NAMES) await db[name].clear()
     for (const name of TABLE_NAMES) {
-      if (backup[name].length > 0) await db[name].bulkAdd(backup[name])
+      const rows = sanitizeRows(name, backup[name])
+      if (rows.length > 0) await db[name].bulkAdd(rows)
     }
-  })
-}
-
-export async function clearAllData() {
-  await db.transaction('rw', TABLE_NAMES.map((name) => db[name]), async () => {
-    for (const name of TABLE_NAMES) await db[name].clear()
+    if (backup.categories.length === 0) {
+      const now = new Date().toISOString()
+      const categories = DEFAULT_CATEGORIES.map((name, index) => ({
+        id: crypto.randomUUID(),
+        name,
+        sortOrder: index,
+        createdAt: now,
+        updatedAt: now,
+      }))
+      await db.categories.bulkAdd(categories)
+    }
   })
 }

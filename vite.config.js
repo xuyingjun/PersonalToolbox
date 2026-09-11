@@ -18,8 +18,8 @@ export default defineConfig({
         start_url: '/PersonalToolbox/',
         scope: '/PersonalToolbox/',
         display: 'standalone',
-        background_color: '#f6f8f8',
-        theme_color: '#f6f8f8',
+        background_color: '#faf9f6',
+        theme_color: '#faf9f6',
         lang: 'zh-CN',
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },

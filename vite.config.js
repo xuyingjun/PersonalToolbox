@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/PersonalToolbox/',
+  base: './',
   plugins: [
     react(),
     tailwindcss(),
@@ -15,8 +15,8 @@ export default defineConfig({
         name: '上次',
         short_name: '上次',
         description: '个人周期性事务记录工具',
-        start_url: '/PersonalToolbox/',
-        scope: '/PersonalToolbox/',
+        start_url: './',
+        scope: './',
         display: 'standalone',
         background_color: '#f7f7f8',
         theme_color: '#ea580c',
@@ -29,6 +29,7 @@ export default defineConfig({
       },
       workbox: {
         cacheId: 'lasttime',
+        cleanupOutdatedCaches: true,
         navigateFallback: 'index.html',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
       },

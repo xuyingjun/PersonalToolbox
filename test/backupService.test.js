@@ -98,7 +98,34 @@ describe('validateBackup', () => {
 
     const backup3 = await createBackup()
     backup3.settings = [{ key: 'theme', value: 'blue' }]
-    assert.throws(() => validateBackup(backup3), /主题设置格式不正确/)
+    assert.throws(() => validateBackup(backup3), /设置格式不正确/)
+  })
+
+  it('拒绝未来或同一天重复记录', async () => {
+    await seedData()
+    const future = await createBackup()
+    future.events[0].eventDate = '2999-01-01'
+    assert.throws(() => validateBackup(future), /不能晚于今天/)
+
+    const duplicate = await createBackup()
+    duplicate.events.push({ ...duplicate.events[0], id: 'event-2' })
+    assert.throws(() => validateBackup(duplicate), /同一事项同一天的重复记录/)
+  })
+
+  it('拒绝异常分类、周期和设置', async () => {
+    await seedData()
+    const duplicateCategory = await createBackup()
+    duplicateCategory.categories[1].name = duplicateCategory.categories[0].name
+    assert.throws(() => validateBackup(duplicateCategory), /重复分类名称/)
+
+    const invalidCycle = await createBackup()
+    invalidCycle.items[0].cycleType = 'custom'
+    invalidCycle.items[0].cycleValue = 3651
+    assert.throws(() => validateBackup(invalidCycle), /周期天数格式不正确/)
+
+    const invalidSetting = await createBackup()
+    invalidSetting.settings = [{ key: 'upcomingThreshold', value: 99 }]
+    assert.throws(() => validateBackup(invalidSetting), /设置格式不正确/)
   })
 })
 
@@ -120,6 +147,7 @@ describe('restoreBackup', () => {
     const item = await db.items.get('item-1')
     assert.equal(item.name, '洗牙')
     assert.equal(item.cycleType, 'yearly')
+    assert.ok((await getAllCategories()).every((category) => category.icon))
   })
 
   it('覆盖式导入：现有数据被替换', async () => {
@@ -150,7 +178,20 @@ describe('restoreBackup', () => {
     backup.events = []
     backup.categories = []
     await restoreBackup(backup)
-    assert.deepEqual((await getAllCategories()).map((category) => category.name), ['生活', '家庭', '健康', '汽车', '工作', '学习', '数码', '其他'])
+    const categories = await getAllCategories()
+    assert.deepEqual(categories.map((category) => category.name), ['生活', '家庭', '健康', '汽车', '工作', '学习', '数码', '其他'])
+    assert.ok(categories.every((category) => category.icon))
+  })
+
+  it('旧备份缺少分类图标时自动补全', async () => {
+    const backup = await createBackup()
+    backup.categories = backup.categories.map((category) => {
+      const legacyCategory = { ...category }
+      delete legacyCategory.icon
+      return legacyCategory
+    })
+    await restoreBackup(backup)
+    assert.ok((await getAllCategories()).every((category) => category.icon))
   })
 
   it('settings 整体替换，meta 不受影响', async () => {

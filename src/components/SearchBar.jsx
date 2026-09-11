@@ -1,4 +1,4 @@
-import { Search, X } from 'lucide-react'
+import { Search, X } from './ui/AppIcon.jsx'
 
 export default function SearchBar({ value, onChange, placeholder = '搜索名称、分类或备注', ariaLabel = '搜索事项' }) {
   return (

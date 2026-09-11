@@ -17,6 +17,8 @@ export async function createEvent(itemId, eventDate, note = '') {
   await db.transaction('rw', db.events, db.items, async () => {
     const item = await db.items.get(itemId)
     if (!item) throw new Error('事项不存在。')
+    const duplicate = await db.events.where('[itemId+eventDate]').equals([itemId, validated.eventDate]).first()
+    if (duplicate) throw new Error('该日期已经有一条记录。')
     await db.events.add({ id: crypto.randomUUID(), itemId, ...validated, createdAt: now, updatedAt: now })
     await db.items.update(itemId, { updatedAt: now })
   })
@@ -27,6 +29,8 @@ export async function updateEvent(id, data) {
   if (!existing) throw new Error('记录不存在。')
   const validated = validateEventInput({ ...existing, ...data })
   await db.transaction('rw', db.events, db.items, async () => {
+    const duplicates = await db.events.where('[itemId+eventDate]').equals([existing.itemId, validated.eventDate]).toArray()
+    if (duplicates.some((event) => event.id !== id)) throw new Error('该日期已经有一条记录。')
     await db.events.update(id, { ...validated, updatedAt: new Date().toISOString() })
     await db.items.update(existing.itemId, { updatedAt: new Date().toISOString() })
   })

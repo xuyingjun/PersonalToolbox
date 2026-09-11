@@ -12,6 +12,7 @@ export function useLiveData(querier, dependencyKey = null, initialValue = []) {
   }, [querier, initialValue])
 
   useEffect(() => {
+    setState({ data: initialValueRef.current, error: null, loading: true })
     const subscription = liveQuery(() => querierRef.current()).subscribe({
       next: (data) => setState({ data, error: null, loading: false }),
       error: (error) => setState({ data: initialValueRef.current, error, loading: false }),

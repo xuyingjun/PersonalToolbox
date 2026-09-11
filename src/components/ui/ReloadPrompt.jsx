@@ -1,5 +1,5 @@
-import { RefreshCw, X } from 'lucide-react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import { RefreshCw, X } from './AppIcon.jsx'
 
 export default function ReloadPrompt() {
   const {

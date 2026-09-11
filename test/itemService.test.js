@@ -94,6 +94,12 @@ describe('createItemWithEvent', () => {
     assert.equal(await db.items.count(), 0)
     assert.equal(await db.events.count(), 0)
   })
+
+  it('未来日期整体回滚', async () => {
+    await assert.rejects(createItemWithEvent({ ...baseInput }, '2999-01-01'), /发生日期不能晚于今天/)
+    assert.equal(await db.items.count(), 0)
+    assert.equal(await db.events.count(), 0)
+  })
 })
 
 describe('deleteItem', () => {

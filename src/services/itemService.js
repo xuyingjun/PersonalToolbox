@@ -1,10 +1,10 @@
 import { db } from '../db/db.js'
 import { CYCLE_TYPES } from '../db/schema.js'
-import { parseLocalDate } from '../utils/date.js'
+import { validateEventInput } from './eventService.js'
 
 const NAME_MAX = 80
 const NOTE_MAX = 500
-const CUSTOM_MAX_DAYS = 3650
+export const CUSTOM_MAX_DAYS = 3650
 
 export function validateItemInput(input) {
   const name = (input.name ?? '').trim()
@@ -50,9 +50,7 @@ export async function createItem(data) {
 // 新增事项 +（可选）首条 Event，单事务保证原子性，失败整体回滚。
 export async function createItemWithEvent(data, eventDate) {
   const validated = validateItemInput(data)
-  if (eventDate) {
-    if (!parseLocalDate(eventDate)) throw new Error('请选择有效日期。')
-  }
+  const validatedEvent = eventDate ? validateEventInput({ eventDate, note: '' }) : null
 
   const now = new Date().toISOString()
   const item = {
@@ -65,12 +63,11 @@ export async function createItemWithEvent(data, eventDate) {
 
   await db.transaction('rw', db.items, db.events, async () => {
     await db.items.add(item)
-    if (eventDate) {
+    if (validatedEvent) {
       await db.events.add({
         id: crypto.randomUUID(),
         itemId: item.id,
-        eventDate,
-        note: '',
+        ...validatedEvent,
         createdAt: now,
         updatedAt: now,
       })

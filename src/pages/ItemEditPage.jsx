@@ -1,7 +1,7 @@
-import { ArrowLeft, ChevronRight, RotateCcw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CycleSelector from '../components/CycleSelector.jsx'
+import { ArrowLeft, ChevronRight, RotateCcw } from '../components/ui/AppIcon.jsx'
 import DataState from '../components/ui/DataState.jsx'
 import { formatCycleLabel } from '../db/schema.js'
 import { useLiveData } from '../hooks/useLiveData.js'

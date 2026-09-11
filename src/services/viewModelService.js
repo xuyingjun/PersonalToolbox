@@ -84,9 +84,21 @@ export async function getAllItemViewModels() {
   return buildItemViewModels(data)
 }
 
-export async function getItemViewModel(itemId) {
-  const data = await loadViewModelData()
-  return buildItemViewModels(data).find((item) => item.id === itemId) ?? null
+export async function getItemViewModel(itemId, today = getTodayString()) {
+  const item = await db.items.get(itemId)
+  if (!item) return null
+  const [events, category, upcomingThreshold] = await Promise.all([
+    db.events.where('itemId').equals(itemId).toArray(),
+    db.categories.get(item.categoryId),
+    getSetting(UPCOMING_THRESHOLD_KEY, DEFAULT_UPCOMING_THRESHOLD),
+  ])
+  return buildItemViewModels({
+    items: [item],
+    events,
+    categories: category ? [category] : [],
+    today,
+    upcomingThreshold,
+  })[0]
 }
 
 // 搜索范围：name / note / category

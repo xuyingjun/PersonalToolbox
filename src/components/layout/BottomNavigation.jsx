@@ -1,5 +1,5 @@
-import { Home, LayoutList, UserRound } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { Home, LayoutList, UserRound } from '../ui/AppIcon.jsx'
 
 const navigation = [
   { label: '首页', path: '/', icon: Home, end: true },

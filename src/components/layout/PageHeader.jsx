@@ -1,5 +1,5 @@
-import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { ArrowLeft } from '../ui/AppIcon.jsx'
 
 export default function PageHeader({ title }) {
   const navigate = useNavigate()

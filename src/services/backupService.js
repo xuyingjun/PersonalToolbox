@@ -1,8 +1,10 @@
 import { db } from '../db/db.js'
+import { CATEGORY_ICON_OPTIONS, DEFAULT_CATEGORY_ICONS, getCategoryIcon } from '../constants/categoryIcons.js'
 import { CYCLE_TYPES } from '../db/schema.js'
 import { DEFAULT_CATEGORIES } from '../db/seed.js'
 import { getTodayString, parseLocalDate } from '../utils/date.js'
-import { VALID_THEMES } from './settingsService.js'
+import { CUSTOM_MAX_DAYS } from './itemService.js'
+import { validateSetting } from './settingsService.js'
 
 const BACKUP_APP = 'LastTime'
 const BACKUP_VERSION = '1.0'
@@ -13,13 +15,17 @@ const TABLE_NAMES = ['items', 'events', 'categories', 'settings']
 const FIELDS = {
   items: ['id', 'name', 'categoryId', 'cycleType', 'cycleValue', 'note', 'createdAt', 'updatedAt'],
   events: ['id', 'itemId', 'eventDate', 'note', 'createdAt', 'updatedAt'],
-  categories: ['id', 'name', 'sortOrder', 'createdAt', 'updatedAt'],
+  categories: ['id', 'name', 'icon', 'sortOrder', 'createdAt', 'updatedAt'],
   settings: ['key', 'value'],
 }
 
 function sanitizeRows(table, rows) {
   const fields = FIELDS[table]
-  return rows.map((row) => Object.fromEntries(fields.map((field) => [field, row[field]])))
+  return rows.map((row) => {
+    const sanitized = Object.fromEntries(fields.map((field) => [field, row[field]]))
+    if (table === 'categories') sanitized.icon = getCategoryIcon(row.name, row.icon)
+    return sanitized
+  })
 }
 
 function assertArray(value, name) {
@@ -57,7 +63,9 @@ function validateRows(backup) {
     assertText(record.categoryId, '事项分类', 40)
     if (!CYCLE_TYPES.includes(record.cycleType)) throw new Error('备份中的周期格式不正确。')
     if (record.cycleType === 'custom') {
-      if (!Number.isInteger(record.cycleValue) || record.cycleValue <= 0) throw new Error('备份中的周期天数格式不正确。')
+      if (!Number.isInteger(record.cycleValue) || record.cycleValue <= 0 || record.cycleValue > CUSTOM_MAX_DAYS) {
+        throw new Error('备份中的周期天数格式不正确。')
+      }
     } else if (record.cycleValue != null) {
       throw new Error('备份中的周期值格式不正确。')
     }
@@ -67,21 +75,36 @@ function validateRows(backup) {
     assertRecordBase(record, '记录')
     assertText(record.itemId, '记录归属', 40)
     if (!parseLocalDate(record.eventDate)) throw new Error('备份中的发生日期格式不正确。')
+    if (record.eventDate > getTodayString()) throw new Error('备份中的发生日期不能晚于今天。')
     assertText(record.note ?? '', '记录备注', 500, true)
   })
 
   backup.categories.forEach((record) => {
     assertRecordBase(record, '分类')
     assertText(record.name, '分类名称', 20)
-    if (!Number.isInteger(record.sortOrder)) throw new Error('备份中的分类排序格式不正确。')
+    if (record.name !== record.name.trim()) throw new Error('备份中的分类名称格式不正确。')
+    if (record.icon != null && !CATEGORY_ICON_OPTIONS.includes(record.icon)) throw new Error('备份中的分类图标格式不正确。')
+    if (!Number.isInteger(record.sortOrder) || record.sortOrder < 0) throw new Error('备份中的分类排序格式不正确。')
   })
 
   backup.settings.forEach((record) => {
     if (!record || typeof record !== 'object' || Array.isArray(record)) throw new Error('备份中的设置格式不正确。')
     assertText(record.key, '设置键', 60)
     if (!('value' in record)) throw new Error('备份中的设置格式不正确。')
-    if (record.key === 'theme' && !VALID_THEMES.includes(record.value)) throw new Error('备份中的主题设置格式不正确。')
+    try {
+      validateSetting(record.key, record.value)
+    } catch {
+      throw new Error('备份中的设置格式不正确。')
+    }
   })
+
+  const categoryNames = backup.categories.map((record) => record.name)
+  if (new Set(categoryNames).size !== categoryNames.length) throw new Error('备份中存在重复分类名称。')
+  const sortOrders = backup.categories.map((record) => record.sortOrder)
+  if (new Set(sortOrders).size !== sortOrders.length) throw new Error('备份中存在重复分类排序。')
+
+  const eventKeys = backup.events.map((record) => `${record.itemId}\u0000${record.eventDate}`)
+  if (new Set(eventKeys).size !== eventKeys.length) throw new Error('备份中存在同一事项同一天的重复记录。')
 }
 
 function validateReferences(backup) {
@@ -178,6 +201,7 @@ export async function restoreBackup(backup) {
       const categories = DEFAULT_CATEGORIES.map((name, index) => ({
         id: crypto.randomUUID(),
         name,
+        icon: DEFAULT_CATEGORY_ICONS[name],
         sortOrder: index,
         createdAt: now,
         updatedAt: now,

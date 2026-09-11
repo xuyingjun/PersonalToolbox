@@ -1,5 +1,5 @@
-import { ChevronRight, DatabaseBackup, Info, Tags } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { Bell, ChevronRight, DatabaseBackup, Info, Tags } from '../components/ui/AppIcon.jsx'
 import { useLiveData } from '../hooks/useLiveData.js'
 import { getSettingsOverview } from '../services/settingsOverviewService.js'
 
@@ -8,6 +8,7 @@ const menuGroups = [
     title: '基础管理',
     items: [
       { to: '/settings/categories', icon: Tags, label: '分类管理', description: '名称、图标与排序', countKey: 'categoryCount', unit: '个分类' },
+      { to: '/settings/reminders', icon: Bell, label: '关注范围', description: '设置提前关注的天数' },
     ],
   },
   {
@@ -20,7 +21,7 @@ const menuGroups = [
 ]
 
 export default function SettingsHubPage() {
-  const { data: overview } = useLiveData(getSettingsOverview, null, {
+  const { data: overview, error } = useLiveData(getSettingsOverview, null, {
     itemCount: 0,
     eventCount: 0,
     categoryCount: 0,
@@ -42,6 +43,8 @@ export default function SettingsHubPage() {
           <div><strong>{overview.categoryCount}</strong><span>分类</span></div>
         </div>
       </section>
+
+      {error && <p className="settings-message" role="alert">数据概览读取失败，请重新打开应用。</p>}
 
       {menuGroups.map((group) => (
         <section className="settings-group" key={group.title}>

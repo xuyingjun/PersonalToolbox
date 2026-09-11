@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { Plus } from './ui/AppIcon.jsx'
 
 export default function Fab({ to = '/items/new', label = '新增事项' }) {
   return (

@@ -1,11 +1,14 @@
-import { describe, it } from 'node:test'
+import { beforeEach, describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { STATUS } from '../src/services/statusService.js'
 import {
   filterItemViewModels,
   buildItemViewModels,
+  getItemViewModel,
   sortItemViewModels,
 } from '../src/services/viewModelService.js'
+import { db } from '../src/db/db.js'
+import { installFakeIndexedDB, resetDatabase } from '../test-helpers/setup-indexeddb.js'
 
 const TODAY = '2026-09-11'
 const ISO = '2026-09-01T00:00:00.000Z'
@@ -29,6 +32,11 @@ const events = [
   { id: 'e-4', itemId: 'i-upcoming', eventDate: '2026-09-05', note: '', createdAt: ISO, updatedAt: ISO },
   { id: 'e-5', itemId: 'i-nocycle', eventDate: '2026-08-01', note: '', createdAt: ISO, updatedAt: ISO },
 ]
+
+beforeEach(async () => {
+  installFakeIndexedDB()
+  await resetDatabase()
+})
 
 function build() {
   return buildItemViewModels({ items, events, categories, today: TODAY, upcomingThreshold: 7 })
@@ -79,6 +87,21 @@ describe('buildItemViewModels', () => {
     assert.deepEqual(overdue.cycle, { type: 'daily', value: null, label: '每天' })
     const nocycle = viewModels.find((item) => item.id === 'i-nocycle')
     assert.equal(nocycle.cycle.label, '不设置')
+  })
+})
+
+describe('getItemViewModel', () => {
+  it('只组装指定事项的数据', async () => {
+    const category = await db.categories.where('name').equals('其他').first()
+    await db.items.bulkAdd([
+      items[0],
+      { ...items[1], categoryId: category.id },
+    ])
+    await db.events.bulkAdd(events.slice(0, 4))
+    const result = await getItemViewModel('i-upcoming')
+    assert.equal(result.id, 'i-upcoming')
+    assert.equal(result.statistics.eventCount, 1)
+    assert.equal(result.category, '其他')
   })
 })
 

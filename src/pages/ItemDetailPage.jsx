@@ -1,15 +1,16 @@
-import { ArrowLeft, CalendarPlus, Check, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import AddEventSheet from '../components/AddEventSheet.jsx'
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import { ArrowLeft, CalendarPlus, Check, Pencil, Trash2 } from '../components/ui/AppIcon.jsx'
 import DataState from '../components/ui/DataState.jsx'
 import Modal from '../components/ui/Modal.jsx'
 import { useLiveData } from '../hooks/useLiveData.js'
-import { useItemViewModels } from '../hooks/useItemViewModels.js'
+import { useToday } from '../hooks/useToday.js'
 import { deleteEvent, getEventsByItemId, recordToday } from '../services/eventService.js'
 import { deleteItem } from '../services/itemService.js'
+import { getItemViewModel } from '../services/viewModelService.js'
 import { formatDate, formatNextDate, formatRelativeDays } from '../utils/date.js'
 
 function formatInterval(days) {
@@ -22,8 +23,9 @@ function formatInterval(days) {
 export default function ItemDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { viewModels, today, loading, error } = useItemViewModels()
-  const { data: events } = useLiveData(() => getEventsByItemId(id), id, [])
+  const today = useToday()
+  const { data: item, loading, error } = useLiveData(() => getItemViewModel(id, today), `${id}:${today}`, null)
+  const { data: events, error: eventsError } = useLiveData(() => getEventsByItemId(id), id, [])
 
   const [historyOpen, setHistoryOpen] = useState(false)
   const [eventSheetOpen, setEventSheetOpen] = useState(false)
@@ -33,8 +35,6 @@ export default function ItemDetailPage() {
   const [confirmItemDelete, setConfirmItemDelete] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
-
-  const item = viewModels?.find((viewModel) => viewModel.id === id)
 
   async function handleRecord() {
     try {
@@ -61,6 +61,7 @@ export default function ItemDetailPage() {
     try {
       await deleteEvent(confirmEventDelete.id)
       setConfirmEventDelete(null)
+      setHistoryOpen(true)
     } catch (deleteError) {
       setMessage(deleteError.message || '删除失败，请重试。')
     } finally {
@@ -81,7 +82,17 @@ export default function ItemDetailPage() {
     if (returnToHistory) setHistoryOpen(true)
   }
 
-  if (loading || !viewModels) return <div className="page"><DataState loading /></div>
+  function confirmDeleteEvent(event) {
+    setHistoryOpen(false)
+    setConfirmEventDelete(event)
+  }
+
+  function closeDeleteEventDialog() {
+    setConfirmEventDelete(null)
+    setHistoryOpen(true)
+  }
+
+  if (loading) return <div className="page"><DataState loading /></div>
   if (error) return <div className="page"><DataState error /></div>
   if (!item) return <div className="page"><DataState empty emptyText="事项不存在或已被删除。" /></div>
 
@@ -119,6 +130,7 @@ export default function ItemDetailPage() {
       </button>
 
       {message && <p className="page-message" role="status">{message}</p>}
+      {eventsError && <p className="page-message" role="alert">历史记录读取失败，请重新打开页面。</p>}
 
       <dl className="detail-list">
         <div>
@@ -199,7 +211,7 @@ export default function ItemDetailPage() {
                     className="icon-button"
                     type="button"
                     aria-label="删除这条记录"
-                    onClick={() => setConfirmEventDelete(event)}
+                    onClick={() => confirmDeleteEvent(event)}
                   >
                     <Trash2 size={17} />
                   </button>
@@ -231,7 +243,7 @@ export default function ItemDetailPage() {
           message={`确定删除 ${formatDate(confirmEventDelete.eventDate)} 这条记录吗？`}
           busy={busy}
           onConfirm={handleDeleteEvent}
-          onClose={() => setConfirmEventDelete(null)}
+          onClose={closeDeleteEventDialog}
         />
       )}
 

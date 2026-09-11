@@ -1,6 +1,6 @@
-import { RefreshCw, SearchCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import PageHeader from '../../components/layout/PageHeader.jsx'
+import { RefreshCw, SearchCheck } from '../../components/ui/AppIcon.jsx'
 import { APP_VERSION } from '../../db/schema.js'
 
 function formatBytes(value) {
@@ -30,7 +30,8 @@ export default function AboutSettingsPage() {
     setBusy(true)
     try {
       const registrations = await navigator.serviceWorker.getRegistrations()
-      await Promise.all(registrations.map((registration) => registration.update()))
+      const appScope = new URL(import.meta.env.BASE_URL, window.location.href).href
+      await Promise.all(registrations.filter((registration) => registration.scope === appScope).map((registration) => registration.update()))
       setMessage('已检查更新；如有新版本，将提示刷新。')
     } catch {
       setMessage('检查更新失败，请确认网络后重试。')
@@ -48,10 +49,10 @@ export default function AboutSettingsPage() {
     try {
       const keys = await caches.keys()
       await Promise.all(keys.filter((key) => key.toLowerCase().includes('lasttime')).map((key) => caches.delete(key)))
-      const appPath = new URL(import.meta.env.BASE_URL, window.location.origin).pathname.toLowerCase()
+      const appScope = new URL(import.meta.env.BASE_URL, window.location.href).href
       const registrations = await navigator.serviceWorker.getRegistrations()
       await Promise.all(registrations
-        .filter((registration) => new URL(registration.scope).pathname.toLowerCase().startsWith(appPath))
+        .filter((registration) => registration.scope === appScope)
         .map((registration) => registration.unregister()))
       window.location.reload()
     } catch {

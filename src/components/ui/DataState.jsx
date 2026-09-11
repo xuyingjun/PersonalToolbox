@@ -1,4 +1,4 @@
-import { AlertCircle, LoaderCircle } from 'lucide-react'
+import { AlertCircle, LoaderCircle } from './AppIcon.jsx'
 
 export default function DataState({ loading, error, empty, emptyText }) {
   if (loading) {

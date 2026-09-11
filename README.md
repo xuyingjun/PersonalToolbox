@@ -1,8 +1,8 @@
-# LastTime
+# 上次
 
 记录生活中那些“最后一次”的时刻。
 
-LastTime 是一个独立的个人周期性事务记录 PWA。记录一件事情最后一次发生的时间，并根据历史记录和用户设置的周期，告诉用户下一次大概什么时候需要关注。
+“上次”（英文名 LastTime）是一个独立的个人周期性事务记录 PWA。记录一件事情最后一次发生的时间，并根据历史记录和用户设置的周期，告诉用户下一次大概什么时候需要关注。
 
 在线访问：[LastTime](https://xuyingjun.github.io/PersonalToolbox/)
 
@@ -25,8 +25,9 @@ LatestEvent / NextDate / Status / Statistics 全部动态计算，不保存到�
 - **轻量统计**：记录次数、平均/最长/最短间隔（不足两次不显示无意义数据）
 - **搜索与排序**：按名称、分类、备注搜索；四种排序
 - **数据管理**：JSON 导出 / 校验导入（覆盖模式）、旧“个人工具箱”数据一键迁移
-- **分类管理**：默认 8 个分类，可增改删（被引用的分类不可删除）
-- **外观**：跟随系统 / 浅色 / 深色
+- **分类管理**：默认 8 个分类，可选择图标、增改、排序和删除（被引用的分类不可删除）
+- **关注范围**：设置事项提前多少天进入“需要关注”
+- **外观**：统一明亮橙色主题
 
 ## 设计原则
 
@@ -70,7 +71,7 @@ npm run preview  # 预览生产构建（含 Service Worker，开发模式下 SW 
 - React Router（HashRouter）
 - Tailwind CSS 4
 - Dexie 与 IndexedDB
-- Lucide React
+- 本地 ClassApp 风格 SVG 图标与分类 emoji
 - vite-plugin-pwa
 - Node.js 内置测试运行器 + fake-indexeddb
 
@@ -99,17 +100,13 @@ scripts/        # 零依赖 PWA 图标生成器
 
 所有业务数据只保存在当前浏览器的 IndexedDB 中，不会上传到服务器，也没有账号或云同步功能。
 
-清理浏览器网站数据、卸载 PWA 或系统存储回收都可能删除本机数据。请在“设置 > 数据管理”中定期导出 JSON 备份，并妥善保管包含私人内容的备份文件。导入采用覆盖模式，确认后会替换当前全部数据。
+清理浏览器网站数据、卸载 PWA 或系统存储回收都可能删除本机数据。请在“我的 > 数据备份与恢复”中定期导出 JSON 备份，并妥善保管包含私人内容的备份文件。导入采用覆盖模式，确认后会替换当前全部数据。
 
-旧版“个人工具箱”的 `lastTimeRecords` 数据可在“设置 > 数据管理”中一键迁移（幂等，不删除旧库）。
+旧版“个人工具箱”的 `lastTimeRecords` 数据可在“我的 > 数据备份与恢复”中一键迁移（幂等，不删除旧库）。
 
 ## 部署
 
-项目通过 GitHub Actions 构建并部署到 GitHub Pages。Vite 生产基础路径为 `/PersonalToolbox/`，页面路由使用 HashRouter，避免刷新时出现 404。
-
-> 注意：需求文档规定基础路径为 `/last-time/`。当前仓库名为 PersonalToolbox，
-> 为保持一致暂时使用 `/PersonalToolbox/`；若将仓库改名为 `last-time`，
-> 需同步修改 `vite.config.js`、`index.html` 中的路径。
+项目通过 GitHub Actions 构建并部署到 GitHub Pages。Vite 使用相对资源路径，页面路由使用 HashRouter，可部署在 GitHub Pages 或其他静态子目录中。
 
 推送到 `main` 分支后，工作流会依次安装依赖、运行测试和 ESLint、构建应用并发布 `dist` 目录。
 

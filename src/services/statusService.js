@@ -1,5 +1,6 @@
 // 核心状态计算系统。Status 只存在于内存（ViewModel），禁止落库。
 import { addCycle, differenceInCalendarDays, getTodayString } from '../utils/date.js'
+import { DEFAULT_UPCOMING_THRESHOLD } from '../constants/settings.js'
 
 export const STATUS = {
   NO_RECORD: 'NO_RECORD',
@@ -10,7 +11,7 @@ export const STATUS = {
   OVERDUE: 'OVERDUE',
 }
 
-export const DEFAULT_UPCOMING_THRESHOLD = 7
+export { DEFAULT_UPCOMING_THRESHOLD }
 
 export function calculateNextDate(item, latestEvent) {
   if (!latestEvent) return null

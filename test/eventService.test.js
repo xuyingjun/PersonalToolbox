@@ -52,6 +52,12 @@ describe('createEvent', () => {
   it('事项不存在时报错', async () => {
     await assert.rejects(createEvent('ghost', getTodayString()), /事项不存在/)
   })
+
+  it('拒绝同一事项同一天重复记录', async () => {
+    const itemId = await createTestItem()
+    await createEvent(itemId, '2026-01-05')
+    await assert.rejects(createEvent(itemId, '2026-01-05'), /该日期已经有一条记录/)
+  })
 })
 
 describe('recordToday', () => {
@@ -112,6 +118,14 @@ describe('updateEvent / deleteEvent', () => {
     await createEvent(itemId, '2026-01-01')
     const event = (await getEventsByItemId(itemId))[0]
     await assert.rejects(updateEvent(event.id, { eventDate: '2999-01-01' }), /发生日期不能晚于今天/)
+  })
+
+  it('拒绝修改为同一事项已有的日期', async () => {
+    const itemId = await createTestItem()
+    await createEvent(itemId, '2026-01-01')
+    await createEvent(itemId, '2026-01-02')
+    const event = (await getEventsByItemId(itemId))[0]
+    await assert.rejects(updateEvent(event.id, { eventDate: '2026-01-01' }), /该日期已经有一条记录/)
   })
 
   it('删除 Event', async () => {

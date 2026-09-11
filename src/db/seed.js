@@ -1,5 +1,6 @@
 import { db } from './db.js'
 import { APP_VERSION, SCHEMA_VERSION } from './schema.js'
+import { DEFAULT_CATEGORY_ICONS } from '../constants/categoryIcons.js'
 
 export const DEFAULT_CATEGORIES = ['生活', '家庭', '健康', '汽车', '工作', '学习', '数码', '其他']
 
@@ -13,6 +14,7 @@ export async function ensureDefaultCategories(target = db) {
   const categories = DEFAULT_CATEGORIES.map((name, index) => ({
     id: crypto.randomUUID(),
     name,
+    icon: DEFAULT_CATEGORY_ICONS[name],
     sortOrder: index,
     createdAt: now,
     updatedAt: now,

@@ -8,6 +8,7 @@ import ItemListPage from './pages/ItemListPage.jsx'
 import AboutSettingsPage from './pages/settings/AboutSettingsPage.jsx'
 import BackupSettingsPage from './pages/settings/BackupSettingsPage.jsx'
 import CategorySettingsPage from './pages/settings/CategorySettingsPage.jsx'
+import ReminderSettingsPage from './pages/settings/ReminderSettingsPage.jsx'
 import SettingsHubPage from './pages/SettingsHubPage.jsx'
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="*" element={<Navigate replace to="/" />} />
         </Route>
         <Route path="settings/categories" element={<CategorySettingsPage />} />
+        <Route path="settings/reminders" element={<ReminderSettingsPage />} />
         <Route path="settings/backup" element={<BackupSettingsPage />} />
         <Route path="settings/about" element={<AboutSettingsPage />} />
       </Routes>

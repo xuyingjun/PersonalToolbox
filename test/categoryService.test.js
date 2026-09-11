@@ -20,14 +20,16 @@ describe('默认分类', () => {
   it('首开即有 8 个默认分类且按 sortOrder 排序', async () => {
     const categories = await getAllCategories()
     assert.deepEqual(categories.map((category) => category.name), ['生活', '家庭', '健康', '汽车', '工作', '学习', '数码', '其他'])
+    assert.ok(categories.every((category) => category.icon))
   })
 })
 
 describe('createCategory / updateCategory', () => {
   it('新增排到最后，重名拒绝', async () => {
-    await createCategory('宠物')
+    await createCategory('宠物', '🎯')
     const categories = await getAllCategories()
     assert.equal(categories.at(-1).name, '宠物')
+    assert.equal(categories.at(-1).icon, '🎯')
     await assert.rejects(createCategory('宠物'), /该分类已存在/)
   })
 
@@ -39,9 +41,16 @@ describe('createCategory / updateCategory', () => {
   it('改名且重名拒绝', async () => {
     const categories = await getAllCategories()
     const target = categories.find((category) => category.name === '生活')
-    await updateCategory(target.id, '日常')
-    assert.equal((await db.categories.get(target.id)).name, '日常')
+    await updateCategory(target.id, '日常', '🧹')
+    assert.deepEqual(
+      { name: (await db.categories.get(target.id)).name, icon: (await db.categories.get(target.id)).icon },
+      { name: '日常', icon: '🧹' },
+    )
     await assert.rejects(updateCategory(target.id, '家庭'), /该分类已存在/)
+  })
+
+  it('拒绝非法图标', async () => {
+    await assert.rejects(createCategory('宠物', 'not-an-icon'), /有效的分类图标/)
   })
 })
 

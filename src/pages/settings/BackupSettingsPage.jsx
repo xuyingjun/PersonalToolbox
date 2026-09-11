@@ -1,7 +1,7 @@
-import { Download, RefreshCw, Upload } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import ImportConfirmDialog from '../../components/ImportConfirmDialog.jsx'
 import PageHeader from '../../components/layout/PageHeader.jsx'
+import { Download, RefreshCw, Upload } from '../../components/ui/AppIcon.jsx'
 import { exportBackup, readBackupFile, restoreBackup } from '../../services/backupService.js'
 import { detectLegacyData, runMigration } from '../../services/migrationService.js'
 
@@ -108,7 +108,7 @@ export default function BackupSettingsPage() {
         {message && <p className="settings-message" role="status">{message}</p>}
       </main>
 
-      {pendingBackup && <ImportConfirmDialog busy={busy} onConfirm={handleConfirmImport} onClose={() => setPendingBackup(null)} />}
+      {pendingBackup && <ImportConfirmDialog backup={pendingBackup} busy={busy} onConfirm={handleConfirmImport} onExport={handleExport} onClose={() => setPendingBackup(null)} />}
     </div>
   )
 }

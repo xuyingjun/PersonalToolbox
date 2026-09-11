@@ -1,18 +1,17 @@
-import { Check, Database, Download, Info, MonitorSmartphone, Palette, Pencil, Plus, RefreshCw, Tags, Trash2, Upload } from 'lucide-react'
+import { Check, Database, Download, Info, MonitorSmartphone, Pencil, Plus, RefreshCw, Tags, Trash2, Upload } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import CategoryIcon from '../components/CategoryIcon.jsx'
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog.jsx'
 import ImportConfirmDialog from '../components/ImportConfirmDialog.jsx'
 import { useLiveData } from '../hooks/useLiveData.js'
 import { exportBackup, readBackupFile, restoreBackup } from '../services/backupService.js'
 import { createCategory, deleteCategory, getAllCategories, updateCategory } from '../services/categoryService.js'
 import { detectLegacyData, runMigration } from '../services/migrationService.js'
-import { DEFAULT_THEME, getSetting, setSetting, THEME_KEY } from '../services/settingsService.js'
 import { APP_VERSION } from '../db/schema.js'
 
 export default function SettingsPage() {
   const fileInput = useRef(null)
   const [message, setMessage] = useState('')
-  const { data: theme } = useLiveData(() => getSetting(THEME_KEY, DEFAULT_THEME), null, DEFAULT_THEME)
   const { data: categories } = useLiveData(() => getAllCategories(), null, [])
 
   // 备份导入
@@ -136,15 +135,6 @@ export default function SettingsPage() {
       </header>
 
       <section className="settings-section">
-        <div className="settings-title"><Palette size={20} /><h2>外观</h2></div>
-        <div className="segmented-control" aria-label="外观模式">
-          {[['system', '跟随系统'], ['light', '浅色'], ['dark', '深色']].map(([value, label]) => (
-            <button className={theme === value ? 'is-selected' : ''} type="button" key={value} onClick={() => setSetting(THEME_KEY, value)}>{label}</button>
-          ))}
-        </div>
-      </section>
-
-      <section className="settings-section">
         <div className="settings-title"><Database size={20} /><h2>数据管理</h2></div>
         <div className="settings-actions">
           <button type="button" onClick={() => runAction(exportBackup, '备份已导出。')}><Download size={19} /><span><strong>导出数据</strong><small>保存 JSON 备份</small></span></button>
@@ -173,6 +163,7 @@ export default function SettingsPage() {
         <div className="category-list">
           {categories.map((category) => (
             <div className="category-row" key={category.id}>
+              <span className="category-icon"><CategoryIcon name={category.name} /></span>
               {editingId === category.id ? (
                 <>
                   <input
@@ -187,7 +178,7 @@ export default function SettingsPage() {
                 </>
               ) : (
                 <>
-                  <span>{category.name}</span>
+                  <span className="category-name">{category.name}</span>
                   <div className="category-actions">
                     <button className="icon-button" type="button" aria-label={`重命名 ${category.name}`} onClick={() => { setEditingId(category.id); setEditingName(category.name) }}>
                       <Pencil size={17} />
@@ -223,7 +214,7 @@ export default function SettingsPage() {
 
       <section className="settings-section">
         <div className="settings-title"><Info size={20} /><h2>关于</h2></div>
-        <p className="settings-copy">LastTime · 版本 {APP_VERSION}</p>
+        <p className="settings-copy">上次 · 版本 {APP_VERSION}</p>
         <p className="settings-copy">用 Event 记录事实，用 Cycle 描述习惯，用 ViewModel 推导状态。</p>
       </section>
 

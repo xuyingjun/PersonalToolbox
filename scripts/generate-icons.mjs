@@ -1,5 +1,5 @@
 // 零依赖 PWA 图标生成器：用 Node 内置 zlib 手写 PNG。
-// 设计：全出血圆角 teal 底 + 白色时钟表盘（圆环 + 10:10 指针 + 中心点）。
+// 设计：全出血暖杏色底 + 白色逆时针回望箭头与时钟，呼应“上次”。
 // 由 prebuild 自动运行，产物确定性一致。
 import { deflateSync } from 'node:zlib'
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -71,24 +71,27 @@ function distanceToSegment(px, py, ax, ay, bx, by) {
   return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
 }
 
-function isInsideRoundedRect(x, y, half, radius) {
-  const dx = Math.max(Math.abs(x - half) - (half - radius), 0)
-  const dy = Math.max(Math.abs(y - half) - (half - radius), 0)
-  return dx * dx + dy * dy <= radius * radius
+function angleDistance(angleA, angleB) {
+  const difference = Math.abs(angleA - angleB) % (Math.PI * 2)
+  return Math.min(difference, Math.PI * 2 - difference)
 }
 
 // 3x3 超采样抗锯齿
 function render(size) {
   const half = size / 2
-  const radius = size * 0.22
+  const clockX = size * 0.54
+  const clockY = size * 0.515
   const ringRadius = size * 0.17
   const ringHalfWidth = size * 0.014
   const handLength = size * 0.11
   const handHalfWidth = size * 0.013
   const dotRadius = size * 0.022
+  const returnRadius = size * 0.305
+  const returnHalfWidth = size * 0.015
+  const arrowTip = [size * 0.21, size * 0.37]
   // 10:10 指针：时针垂直向上，分针 2 点方向
-  const hourEnd = [half, half - handLength]
-  const minuteEnd = [half + handLength * Math.sin(Math.PI / 3), half - handLength * Math.cos(Math.PI / 3)]
+  const hourEnd = [clockX, clockY - handLength]
+  const minuteEnd = [clockX + handLength * Math.sin(Math.PI / 3), clockY - handLength * Math.cos(Math.PI / 3)]
 
   const rgba = Buffer.alloc(size * size * 4)
   const samples = 3
@@ -102,28 +105,28 @@ function render(size) {
         for (let sx = 0; sx < samples; sx += 1) {
           const px = x + (sx + 0.5) * step
           const py = y + (sy + 0.5) * step
-          if (!isInsideRoundedRect(px, py, half, radius)) continue
           bgHits += 1
-          const dist = Math.hypot(px - half, py - half)
+          const dist = Math.hypot(px - clockX, py - clockY)
           const onRing = Math.abs(dist - ringRadius) <= ringHalfWidth
-          const onHour = distanceToSegment(px, py, half, half, hourEnd[0], hourEnd[1]) <= handHalfWidth
-          const onMinute = distanceToSegment(px, py, half, half, minuteEnd[0], minuteEnd[1]) <= handHalfWidth
+          const angle = Math.atan2(py - half, px - half)
+          const onReturnArc = Math.abs(Math.hypot(px - half, py - half) - returnRadius) <= returnHalfWidth
+            && angleDistance(angle, Math.PI) > 0.72
+          const onArrowHead = distanceToSegment(px, py, arrowTip[0], arrowTip[1], size * 0.31, size * 0.37) <= returnHalfWidth
+            || distanceToSegment(px, py, arrowTip[0], arrowTip[1], size * 0.21, size * 0.27) <= returnHalfWidth
+          const onHour = distanceToSegment(px, py, clockX, clockY, hourEnd[0], hourEnd[1]) <= handHalfWidth
+          const onMinute = distanceToSegment(px, py, clockX, clockY, minuteEnd[0], minuteEnd[1]) <= handHalfWidth
           const onDot = dist <= dotRadius
-          if (onRing || onHour || onMinute || onDot) glyphHits += 1
+          if (onReturnArc || onArrowHead || onRing || onHour || onMinute || onDot) glyphHits += 1
         }
       }
 
       const offset = (y * size + x) * 4
       const total = samples * samples
-      if (bgHits === 0) {
-        rgba[offset + 3] = 0 // 透明
-      } else {
-        const coverage = glyphHits / bgHits
-        rgba[offset] = Math.round(BG[0] + (FG[0] - BG[0]) * coverage)
-        rgba[offset + 1] = Math.round(BG[1] + (FG[1] - BG[1]) * coverage)
-        rgba[offset + 2] = Math.round(BG[2] + (FG[2] - BG[2]) * coverage)
-        rgba[offset + 3] = 255
-      }
+      const coverage = glyphHits / bgHits
+      rgba[offset] = Math.round(BG[0] + (FG[0] - BG[0]) * coverage)
+      rgba[offset + 1] = Math.round(BG[1] + (FG[1] - BG[1]) * coverage)
+      rgba[offset + 2] = Math.round(BG[2] + (FG[2] - BG[2]) * coverage)
+      rgba[offset + 3] = 255
     }
   }
   return rgba

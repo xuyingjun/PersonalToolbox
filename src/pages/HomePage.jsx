@@ -52,7 +52,7 @@ export default function HomePage() {
           <History size={24} strokeWidth={1.8} />
         </span>
         <div>
-          <h1>LastTime</h1>
+          <h1>上次</h1>
           <span>记录生活中那些“最后一次”的时刻。</span>
         </div>
       </header>
@@ -66,7 +66,7 @@ export default function HomePage() {
           <EmptyState
             icon={History}
             title="还没有记录"
-            description="记录一件事情最后一次发生的时间，LastTime 会帮你记住下一次。"
+            description="记录一件事情最后一次发生的时间，上次会帮你记住下一次。"
           />
           <button className="primary-button" type="button" onClick={() => navigate('/items/new')}>
             添加第一件事

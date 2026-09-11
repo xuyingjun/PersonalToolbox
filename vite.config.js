@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['apple-touch-icon.png', 'favicon.svg'],
       manifest: {
-        name: 'LastTime',
-        short_name: 'LastTime',
+        name: '上次',
+        short_name: '上次',
         description: '个人周期性事务记录工具',
         start_url: '/PersonalToolbox/',
         scope: '/PersonalToolbox/',

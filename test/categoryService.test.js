@@ -6,6 +6,8 @@ import {
   createCategory,
   deleteCategory,
   getAllCategories,
+  getCategoryUsageCounts,
+  moveCategory,
   updateCategory,
 } from '../src/services/categoryService.js'
 
@@ -58,5 +60,29 @@ describe('deleteCategory', () => {
     await db.items.add({ id: 'i-1', name: '体检', categoryId: target.id, cycleType: 'none', cycleValue: null, note: '', createdAt: now, updatedAt: now })
     await assert.rejects(deleteCategory(target.id), /该分类正在使用，无法删除/)
     assert.equal(await db.categories.count(), 8)
+  })
+})
+
+describe('分类使用数量与排序', () => {
+  it('统计每个分类关联的事项数', async () => {
+    const categories = await getAllCategories()
+    const target = categories.find((category) => category.name === '健康')
+    const now = new Date().toISOString()
+    await db.items.bulkAdd([
+      { id: 'i-1', name: '体检', categoryId: target.id, cycleType: 'none', cycleValue: null, note: '', createdAt: now, updatedAt: now },
+      { id: 'i-2', name: '洗牙', categoryId: target.id, cycleType: 'none', cycleValue: null, note: '', createdAt: now, updatedAt: now },
+    ])
+
+    assert.equal((await getCategoryUsageCounts())[target.id], 2)
+  })
+
+  it('与相邻分类交换顺序，边界移动无操作', async () => {
+    const before = await getAllCategories()
+    await moveCategory(before[1].id, 'up')
+    const moved = await getAllCategories()
+    assert.deepEqual(moved.slice(0, 2).map((category) => category.id), [before[1].id, before[0].id])
+
+    await moveCategory(moved[0].id, 'up')
+    assert.equal((await getAllCategories())[0].id, moved[0].id)
   })
 })

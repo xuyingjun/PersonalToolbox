@@ -1,10 +1,10 @@
-import { Home, LayoutList, Settings } from 'lucide-react'
+import { Home, LayoutList, UserRound } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const navigation = [
   { label: '首页', path: '/', icon: Home, end: true },
   { label: '全部', path: '/items', icon: LayoutList },
-  { label: '设置', path: '/settings', icon: Settings },
+  { label: '我的', path: '/settings', icon: UserRound },
 ]
 
 export default function BottomNavigation() {

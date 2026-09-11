@@ -18,8 +18,8 @@ export default defineConfig({
         start_url: '/PersonalToolbox/',
         scope: '/PersonalToolbox/',
         display: 'standalone',
-        background_color: '#faf9f6',
-        theme_color: '#faf9f6',
+        background_color: '#f7f7f8',
+        theme_color: '#ea580c',
         lang: 'zh-CN',
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
@@ -28,6 +28,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        cacheId: 'lasttime',
         navigateFallback: 'index.html',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
       },

@@ -1,52 +1,52 @@
 @import "tailwindcss";
 
-/* ==================== Design Tokens（暖杏色主题） ==================== */
+/* ==================== Design Tokens（明亮橙色主题） ==================== */
 
 :root {
-  color: #292524;
-  background: #faf9f6;
+  color: #171717;
+  background: #f7f7f8;
   color-scheme: light;
   font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
-  /* 品牌主色：暖杏色 */
-  --color-primary: #d97757;
-  --color-primary-hover: #c96849;
-  --color-primary-dark: #b85c3f;
-  --color-primary-light: #f7e5de;
+  /* 品牌主色：参考 ClassApp 的明亮橙 */
+  --color-primary: #ea580c;
+  --color-primary-hover: #dc4c08;
+  --color-primary-dark: #c2410c;
+  --color-primary-light: #fff7ed;
   --on-primary: #ffffff;
 
   /* 背景与表面 */
-  --color-canvas: #f0ebe5; /* 桌面两侧留白区（比页面暖白深一档，保持画框感） */
-  --color-background: #faf9f6; /* 页面背景（暖白，纸张感） */
+  --color-canvas: #eeeeef; /* 桌面两侧留白区 */
+  --color-background: #f7f7f8; /* 页面背景 */
   --color-surface: #ffffff; /* 卡片 / 输入框 / 弹窗 */
-  --surface-pressed: #f5f2ee;
+  --surface-pressed: #fafafa;
 
   /* 文字层级 */
-  --color-text-primary: #292524;
-  --color-text-secondary: #78716c;
-  --color-text-muted: #a8a29e;
+  --color-text-primary: #171717;
+  --color-text-secondary: #737373;
+  --color-text-muted: #a3a3a3;
 
   /* 边框 */
-  --color-border: #e7e5e4;
+  --color-border: #e5e5e5;
 
-  /* 语义色：与品牌主色区分，保持状态清晰 */
-  --color-success: #5f8a68;
-  --color-success-soft: #e3ede5;
-  --color-warning: #c28a3a;
-  --color-warning-soft: #f5ebd9;
-  --color-error: #b85c5c;
-  --color-error-soft: #f3e1e1;
-  --color-info: #6685a3;
-  --color-info-soft: #e2e9f0;
+  /* 语义色 */
+  --color-success: #16a34a;
+  --color-success-soft: #f0fdf4;
+  --color-warning: #d97706;
+  --color-warning-soft: #fffbeb;
+  --color-error: #dc2626;
+  --color-error-soft: #fef2f2;
+  --color-info: #2563eb;
+  --color-info-soft: #eff6ff;
 
   /* 其他 */
-  --chrome: rgba(250, 249, 246, 0.94);
-  --focus-ring: rgba(217, 119, 87, 0.22);
-  --shadow-soft: 0 2px 8px rgba(41, 37, 36, 0.06);
-  --shadow-float: 0 8px 24px rgba(41, 37, 36, 0.1);
-  --shadow-fab: 0 4px 12px rgba(41, 37, 36, 0.12);
+  --chrome: rgba(247, 247, 248, 0.94);
+  --focus-ring: rgba(234, 88, 12, 0.24);
+  --shadow-soft: 0 2px 8px rgba(23, 23, 23, 0.06);
+  --shadow-float: 0 8px 24px rgba(23, 23, 23, 0.1);
+  --shadow-fab: 0 4px 12px rgba(23, 23, 23, 0.14);
   --nav-height: 64px;
 }
 
@@ -118,7 +118,7 @@ button:disabled {
   min-height: 100dvh;
   margin: 0 auto;
   background:
-    linear-gradient(rgba(41, 37, 36, 0.025) 1px, transparent 1px),
+    linear-gradient(rgba(23, 23, 23, 0.025) 1px, transparent 1px),
     var(--color-background);
   background-size: 100% 32px;
   border-inline: 1px solid var(--color-border);
@@ -917,7 +917,7 @@ button:disabled {
   align-items: flex-end;
   justify-content: center;
   padding-top: env(safe-area-inset-top);
-  background: rgba(41, 37, 36, 0.5);
+  background: rgba(23, 23, 23, 0.5);
 }
 
 .modal-sheet {
@@ -960,28 +960,226 @@ button:disabled {
   line-height: 1.6;
 }
 
-/* ---------- 设置页 ---------- */
+/* ---------- 设置 / 我的 ---------- */
 
-.settings-section {
+.settings-heading {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
+  letter-spacing: 0;
+}
+
+.settings-hero {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 12px;
+  padding: 16px;
+  color: var(--on-primary);
+  background: var(--color-primary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+}
+
+.settings-hero > img {
+  width: 52px;
+  height: 52px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+}
+
+.settings-hero-copy h2,
+.settings-hero-copy p {
+  margin: 0;
+}
+
+.settings-hero-copy h2 {
+  font-size: 1.15rem;
+}
+
+.settings-hero-copy p {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  opacity: 0.86;
+}
+
+.settings-summary {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, 1fr);
+  padding-top: 13px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  text-align: center;
+}
+
+.settings-summary div + div {
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.settings-summary strong,
+.settings-summary span {
+  display: block;
+}
+
+.settings-summary strong {
+  font-size: 1.05rem;
+}
+
+.settings-summary span {
+  margin-top: 2px;
+  font-size: 0.68rem;
+  opacity: 0.82;
+}
+
+.settings-group {
   margin-top: 20px;
-  padding: 15px;
+}
+
+.settings-group > h2 {
+  margin: 0 4px 7px;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+.settings-menu,
+.settings-list-card,
+.settings-detail-card,
+.about-app-card {
+  overflow: hidden;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   box-shadow: var(--shadow-soft);
 }
 
-.settings-title {
-  display: flex;
+.settings-menu-row {
+  display: grid;
+  min-height: 64px;
   align-items: center;
-  gap: 9px;
-  color: var(--color-primary);
+  grid-template-columns: 38px minmax(0, 1fr) 20px;
+  gap: 10px;
+  padding: 8px 12px;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border);
+  text-decoration: none;
 }
 
-.settings-title h2 {
+.settings-menu-row:last-child {
+  border-bottom: 0;
+}
+
+.settings-menu-row:active {
+  background: var(--surface-pressed);
+}
+
+.settings-menu-row > svg {
+  color: var(--color-text-muted);
+}
+
+.settings-menu-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border-radius: 8px;
+}
+
+.settings-menu-copy {
+  min-width: 0;
+}
+
+.settings-menu-copy strong,
+.settings-menu-copy small {
+  display: block;
+}
+
+.settings-menu-copy strong {
+  font-size: 0.9rem;
+}
+
+.settings-menu-copy small {
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-footnote {
+  margin: 16px 4px 0;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.settings-subpage {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--color-background);
+  border-inline: 1px solid var(--color-border);
+}
+
+.subpage-header {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: grid;
+  min-height: calc(56px + env(safe-area-inset-top));
+  align-items: end;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  padding: env(safe-area-inset-top) 4px 0;
+  background: var(--chrome);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(14px);
+}
+
+.subpage-header h1 {
+  align-self: center;
+  overflow: hidden;
   margin: 0;
-  color: var(--color-text-primary);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-subpage-content {
+  padding: 16px 16px calc(28px + env(safe-area-inset-bottom));
+}
+
+.settings-card-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-detail-card {
+  padding: 16px;
+}
+
+.settings-detail-card h2,
+.settings-detail-card p {
+  margin: 0;
+}
+
+.settings-detail-card h2 {
+  font-size: 0.92rem;
+}
+
+.settings-detail-card p {
+  margin-top: 6px;
+  color: var(--color-text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+.settings-detail-card .wide-button {
+  margin-top: 14px;
 }
 
 .segmented-control {
@@ -1010,40 +1208,6 @@ button:disabled {
   font-weight: 750;
 }
 
-.settings-actions {
-  margin-top: 10px;
-}
-
-.settings-actions > button {
-  display: grid;
-  width: 100%;
-  min-height: 62px;
-  align-items: center;
-  grid-template-columns: 32px 1fr;
-  padding: 8px 4px;
-  color: var(--color-text-primary);
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--color-border);
-  text-align: left;
-}
-
-.settings-actions > button:last-child {
-  border-bottom: 0;
-}
-
-.settings-actions span,
-.settings-actions strong,
-.settings-actions small {
-  display: block;
-}
-
-.settings-actions small {
-  margin-top: 3px;
-  color: var(--color-text-secondary);
-}
-
-.settings-copy,
 .settings-message {
   margin: 12px 0 0;
   color: var(--color-text-secondary);
@@ -1077,7 +1241,6 @@ button:disabled {
 .migration-card {
   display: grid;
   gap: 10px;
-  margin-top: 14px;
   padding: 14px;
   background: var(--color-primary-light);
   border: 1px solid var(--color-primary);
@@ -1102,9 +1265,7 @@ button:disabled {
 /* ---------- 分类管理 ---------- */
 
 .category-list {
-  margin-top: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
+  margin: 0;
 }
 
 .category-row {
@@ -1162,10 +1323,59 @@ button:disabled {
   height: 40px;
 }
 
+.category-manage-row {
+  min-height: 64px;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  padding-left: 8px;
+}
+
+.category-manage-row .category-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+}
+
+.category-copy {
+  display: grid;
+  min-width: 0;
+  min-height: 52px;
+  align-content: center;
+  padding: 0 2px;
+  background: transparent;
+  border: 0;
+  text-align: left;
+}
+
+.category-copy strong,
+.category-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-copy strong {
+  font-size: 0.88rem;
+}
+
+.category-copy small {
+  margin-top: 3px;
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+}
+
+.category-manage-row .category-actions .icon-button {
+  flex-basis: 36px;
+  width: 36px;
+}
+
 .add-category {
   display: flex;
   gap: 8px;
   margin-top: 12px;
+}
+
+.add-category.settings-list-card {
+  padding: 12px;
 }
 
 .add-category input {
@@ -1183,6 +1393,85 @@ button:disabled {
 
 .add-category input:focus {
   border-color: var(--color-primary);
+}
+
+.about-app-card {
+  padding: 22px 16px;
+  text-align: center;
+}
+
+.about-app-card img {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+}
+
+.about-app-card h2 {
+  margin: 10px 0 0;
+  font-size: 1.1rem;
+}
+
+.about-app-card p {
+  margin: 5px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+}
+
+.about-info {
+  margin: 0;
+}
+
+.about-info div {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.about-info div:last-child {
+  border-bottom: 0;
+}
+
+.about-info dt {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+.about-info dd {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.about-info .is-success {
+  color: var(--color-success);
+}
+
+.about-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.install-tip {
+  padding: 14px 16px;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  border-radius: 8px;
+}
+
+.install-tip strong {
+  font-size: 0.86rem;
+}
+
+.install-tip p {
+  margin: 5px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.55;
 }
 
 /* ---------- 数据状态 / 更新提示 ---------- */

@@ -6,7 +6,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const BG = [217, 119, 87] // #d97757 暖杏色
+const BG = [234, 88, 12] // #ea580c ClassApp 强调橙
 const FG = [255, 255, 255]
 
 const SIZES = [

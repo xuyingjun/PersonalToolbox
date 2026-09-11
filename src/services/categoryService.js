@@ -13,6 +13,14 @@ export async function getAllCategories() {
   return db.categories.orderBy('sortOrder').toArray()
 }
 
+export async function getCategoryUsageCounts() {
+  const items = await db.items.toArray()
+  return items.reduce((counts, item) => {
+    counts[item.categoryId] = (counts[item.categoryId] ?? 0) + 1
+    return counts
+  }, {})
+}
+
 export async function createCategory(name) {
   const trimmed = validateName(name)
   const duplicate = await db.categories.where('name').equals(trimmed).first()
@@ -33,6 +41,21 @@ export async function updateCategory(id, name) {
   if (duplicate && duplicate.id !== id) throw new Error('该分类已存在。')
 
   await db.categories.update(id, { name: trimmed, updatedAt: new Date().toISOString() })
+}
+
+export async function moveCategory(id, direction) {
+  await db.transaction('rw', db.categories, async () => {
+    const categories = await db.categories.orderBy('sortOrder').toArray()
+    const index = categories.findIndex((category) => category.id === id)
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (index < 0 || targetIndex < 0 || targetIndex >= categories.length) return
+
+    const now = new Date().toISOString()
+    await db.categories.bulkPut([
+      { ...categories[index], sortOrder: categories[targetIndex].sortOrder, updatedAt: now },
+      { ...categories[targetIndex], sortOrder: categories[index].sortOrder, updatedAt: now },
+    ])
+  })
 }
 
 // 被 Item 引用的分类禁止删除（事务内校验，避免遗留悬空引用）。

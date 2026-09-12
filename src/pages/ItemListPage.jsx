@@ -83,7 +83,7 @@ export default function ItemListPage() {
           <EmptyState
             icon={ListChecks}
             title="还没有事项"
-            description="记录一件事情最后一次发生的时间，上次会帮你记住下一次。"
+            description="记录一件事情最后一次发生的时间，拾光会帮你记得下一次。"
           />
         </div>
       ) : visibleItems.length > 0 ? (

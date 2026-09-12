@@ -9,7 +9,7 @@ export default function ImportConfirmDialog({ backup, busy = false, onConfirm, o
 
   return (
     <Modal title="导入数据" dismissible={!busy} onClose={onClose}>
-      <p className="dialog-message">导入后将覆盖当前“上次”数据，请确认文件内容。</p>
+      <p className="dialog-message">导入后将覆盖当前“拾光”数据，请确认文件内容。</p>
       <dl className="import-summary">
         <div><dt>备份时间</dt><dd>{exportedAt}</dd></div>
         <div><dt>事项</dt><dd>{backup.items.length} 项</dd></div>

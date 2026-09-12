@@ -5,7 +5,7 @@ import DataState from '../components/ui/DataState.jsx'
 import Fab from '../components/Fab.jsx'
 import ItemCard from '../components/ItemCard.jsx'
 import SearchBar from '../components/SearchBar.jsx'
-import { History } from '../components/ui/AppIcon.jsx'
+import { RefreshCw } from '../components/ui/AppIcon.jsx'
 import { useItemViewModels } from '../hooks/useItemViewModels.js'
 import { recordToday } from '../services/eventService.js'
 import { sortItemViewModels } from '../services/viewModelService.js'
@@ -49,11 +49,11 @@ export default function HomePage() {
     <div className="page home-page">
       <header className="home-header">
         <span className="brand-mark" aria-hidden="true">
-          <History size={24} strokeWidth={1.8} />
+          <RefreshCw size={24} strokeWidth={1.8} />
         </span>
         <div>
-          <h1>上次</h1>
-          <span>记录生活中那些“最后一次”的时刻。</span>
+          <h1>拾光</h1>
+          <span>拾起每一次，记得下一次。</span>
         </div>
       </header>
 
@@ -64,9 +64,9 @@ export default function HomePage() {
       {isEmpty ? (
         <div className="empty-block">
           <EmptyState
-            icon={History}
+            icon={RefreshCw}
             title="还没有记录"
-            description="记录一件事情最后一次发生的时间，上次会帮你记住下一次。"
+            description="记录一件事情最后一次发生的时间，拾光会帮你记得下一次。"
           />
           <button className="primary-button" type="button" onClick={() => navigate('/items/new')}>
             添加第一件事

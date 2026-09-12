@@ -66,8 +66,8 @@ export default function AboutSettingsPage() {
       <PageHeader title="关于" />
       <main className="settings-subpage-content settings-card-stack">
         <section className="about-app-card">
-          <img src={`${import.meta.env.BASE_URL}pwa-192x192.png`} alt="上次应用图标" />
-          <h2>上次</h2>
+          <img src={`${import.meta.env.BASE_URL}pwa-192x192.png`} alt="拾光应用图标" />
+          <h2>拾光</h2>
           <p>个人周期性事务记录 · 数据仅存于本设备</p>
         </section>
 

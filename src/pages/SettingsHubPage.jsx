@@ -15,7 +15,7 @@ const menuGroups = [
     title: '数据与系统',
     items: [
       { to: '/settings/backup', icon: DatabaseBackup, label: '数据备份与恢复', description: '导出、导入与旧版迁移' },
-      { to: '/settings/about', icon: Info, label: '关于上次', description: '版本、安装与资源更新' },
+      { to: '/settings/about', icon: Info, label: '关于拾光', description: '版本、安装与资源更新' },
     ],
   },
 ]
@@ -32,10 +32,10 @@ export default function SettingsHubPage() {
       <h1 className="settings-heading">我的</h1>
 
       <section className="settings-hero">
-        <img src={`${import.meta.env.BASE_URL}pwa-192x192.png`} alt="上次应用图标" />
+        <img src={`${import.meta.env.BASE_URL}pwa-192x192.png`} alt="拾光应用图标" />
         <div className="settings-hero-copy">
-          <h2>上次</h2>
-          <p>记住每一次，也知道下一次。</p>
+          <h2>拾光</h2>
+          <p>拾起每一次，记得下一次。</p>
         </div>
         <div className="settings-summary" aria-label="数据概览">
           <div><strong>{overview.itemCount}</strong><span>事项</span></div>

@@ -617,6 +617,26 @@ button:disabled {
   gap: 12px;
 }
 
+.cycle-suggestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-primary);
+  border-radius: 7px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.cycle-suggestion .secondary-button {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 0.76rem;
+}
+
 .form-label {
   color: var(--color-text-secondary);
   font-size: 0.78rem;
@@ -905,6 +925,13 @@ button:disabled {
 .stats-item span {
   color: var(--color-text-secondary);
   font-size: 0.72rem;
+}
+
+.stats-note {
+  margin: 9px 2px 0;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  text-align: center;
 }
 
 /* ---------- 弹窗 ---------- */
@@ -1402,8 +1429,43 @@ button:disabled {
 
 .category-manage-row {
   min-height: 64px;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
+  grid-template-columns: 24px 38px minmax(0, 1fr) auto;
   padding-left: 8px;
+  transition: background-color .12s ease, box-shadow .12s ease, transform .12s ease;
+}
+
+/* 拖拽排序 */
+.category-manage-row.is-dragging {
+  position: relative;
+  z-index: 2;
+  background: var(--color-primary-light);
+  box-shadow: var(--shadow-float);
+  transform: scale(1.01);
+}
+
+.drag-handle {
+  display: grid;
+  width: 24px;
+  height: 40px;
+  padding: 0;
+  place-items: center;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: grab;
+  touch-action: none; /* 关键：拖拽时禁止浏览器接管滚动/缩放手势 */
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  color: var(--color-primary);
+}
+
+body.is-drag-sorting,
+body.is-drag-sorting * {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .category-manage-row .category-icon {

@@ -19,6 +19,14 @@ const ICON_PATHS = {
     'M17.25 14.25v3.75m0 0-1.875-1.875M17.25 18l1.875-1.875M14.25 20.25a5.25 5.25 0 1 0 0-7.5',
   ],
   Download: ['M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4.5 19.5h15'],
+  GripVertical: [
+    'M9.75 6.75h.008v.008H9.75V6.75Z',
+    'M9.75 11.25h.008v.008H9.75v-.008Z',
+    'M9.75 15.75h.008v.008H9.75V15.75Z',
+    'M14.25 6.75h.008v.008H14.25V6.75Z',
+    'M14.25 11.25h.008v.008H14.25v-.008Z',
+    'M14.25 15.75h.008v.008H14.25V15.75Z',
+  ],
   History: [
     'M3 12a9 9 0 1 0 3-6.708M3 4.5v4.875h4.875',
     'M12 7.5V12l3 1.5',
@@ -87,6 +95,7 @@ export const Check = icon('Check')
 export const ChevronRight = icon('ChevronRight')
 export const DatabaseBackup = icon('DatabaseBackup')
 export const Download = icon('Download')
+export const GripVertical = icon('GripVertical')
 export const History = icon('History')
 export const Home = icon('Home')
 export const Info = icon('Info')

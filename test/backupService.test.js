@@ -86,7 +86,7 @@ describe('validateBackup', () => {
     assert.throws(() => validateBackup(backup), /无效的分类引用/)
   })
 
-  it('拒绝空分类但有事项 / 非法日期 / 非法主题', async () => {
+  it('拒绝空分类但有事项 / 非法日期', async () => {
     await seedData()
     const backup = await createBackup()
     backup.categories = []
@@ -95,10 +95,6 @@ describe('validateBackup', () => {
     const backup2 = await createBackup()
     backup2.events[0].eventDate = '2026-02-30'
     assert.throws(() => validateBackup(backup2), /发生日期格式不正确/)
-
-    const backup3 = await createBackup()
-    backup3.settings = [{ key: 'theme', value: 'blue' }]
-    assert.throws(() => validateBackup(backup3), /设置格式不正确/)
   })
 
   it('拒绝未来或同一天重复记录', async () => {
@@ -197,12 +193,28 @@ describe('restoreBackup', () => {
   it('settings 整体替换，meta 不受影响', async () => {
     await seedData()
     const backup = await createBackup()
-    backup.settings = [{ key: 'theme', value: 'dark' }]
+    backup.settings = [{ key: 'upcomingThreshold', value: 14 }]
     await restoreBackup(backup)
 
     const settings = await db.settings.toArray()
     assert.equal(settings.length, 1)
-    assert.equal(settings[0].value, 'dark')
+    assert.equal(settings[0].key, 'upcomingThreshold')
+    assert.equal(settings[0].value, 14)
+  })
+
+  it('旧备份中的 theme 设置被静默丢弃', async () => {
+    await seedData()
+    const backup = await createBackup()
+    backup.settings = [
+      { key: 'theme', value: 'dark' },
+      { key: 'upcomingThreshold', value: 14 },
+    ]
+    assert.doesNotThrow(() => validateBackup(backup))
+    await restoreBackup(backup)
+
+    const settings = await db.settings.toArray()
+    assert.equal(settings.length, 1)
+    assert.equal(settings[0].key, 'upcomingThreshold')
   })
 
   it('exportedAt 为今天（文件名日期逻辑）', () => {

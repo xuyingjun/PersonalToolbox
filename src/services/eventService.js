@@ -50,11 +50,6 @@ export async function getEventsByItemId(itemId) {
   return events.sort((first, second) => second.eventDate.localeCompare(first.eventDate))
 }
 
-export async function getLatestEvent(itemId) {
-  const events = await getEventsByItemId(itemId)
-  return events[0] ?? null
-}
-
 // 核心动作“今天做了”：
 // 1. 取今天 YYYY-MM-DD
 // 2. 同一天已有 Event 则禁止重复创建

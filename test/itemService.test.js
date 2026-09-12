@@ -6,8 +6,6 @@ import {
   createItem,
   createItemWithEvent,
   deleteItem,
-  getAllItems,
-  searchItems,
   updateItem,
   validateItemInput,
 } from '../src/services/itemService.js'
@@ -64,14 +62,6 @@ describe('createItem / updateItem', () => {
     assert.equal(item.name, '换机油')
     assert.equal(item.cycleType, 'monthly')
   })
-
-  it('searchItems 匹配 name / note', async () => {
-    await createItem({ ...baseInput, name: '洗牙', note: '半年一次' })
-    await createItem({ ...baseInput, name: '换机油' })
-    assert.equal((await searchItems('洗牙')).length, 1)
-    assert.equal((await searchItems('半年')).length, 1)
-    assert.equal((await searchItems('不存在')).length, 0)
-  })
 })
 
 describe('createItemWithEvent', () => {
@@ -109,7 +99,7 @@ describe('deleteItem', () => {
     await deleteItem(id)
     assert.equal(await db.items.count(), 1)
     assert.equal(await db.events.count(), 1)
-    assert.equal(await getAllItems().then((items) => items[0].name), '另一件')
+    assert.equal((await db.items.toArray())[0].name, '另一件')
   })
 
   it('事项不存在时报错', async () => {

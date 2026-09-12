@@ -3,10 +3,9 @@ import assert from 'node:assert/strict'
 import { db } from '../src/db/db.js'
 import { installFakeIndexedDB, resetDatabase } from '../test-helpers/setup-indexeddb.js'
 import {
-  DEFAULT_THEME,
+  DEFAULT_UPCOMING_THRESHOLD,
   getSetting,
   setSetting,
-  THEME_KEY,
   UPCOMING_THRESHOLD_KEY,
 } from '../src/services/settingsService.js'
 
@@ -17,14 +16,18 @@ beforeEach(async () => {
 
 describe('settingsService', () => {
   it('无值时返回 fallback', async () => {
-    assert.equal(await getSetting(THEME_KEY, DEFAULT_THEME), 'system')
+    assert.equal(await getSetting(UPCOMING_THRESHOLD_KEY, DEFAULT_UPCOMING_THRESHOLD), 7)
   })
 
   it('写入后读回一致，再次写入覆盖', async () => {
-    await setSetting(THEME_KEY, 'dark')
-    assert.equal(await getSetting(THEME_KEY), 'dark')
-    await setSetting(THEME_KEY, 'light')
-    assert.equal(await getSetting(THEME_KEY), 'light')
+    await setSetting(UPCOMING_THRESHOLD_KEY, 10)
+    assert.equal(await getSetting(UPCOMING_THRESHOLD_KEY), 10)
+    await setSetting(UPCOMING_THRESHOLD_KEY, 20)
+    assert.equal(await getSetting(UPCOMING_THRESHOLD_KEY), 20)
+  })
+
+  it('已废弃的 theme 设置不再被接受', async () => {
+    await assert.rejects(setSetting('theme', 'dark'), /不支持的设置项/)
   })
 
   it('关注范围只接受 1–30 的整数', async () => {

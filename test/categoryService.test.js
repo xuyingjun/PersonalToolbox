@@ -8,6 +8,7 @@ import {
   getAllCategories,
   getCategoryUsageCounts,
   moveCategory,
+  reorderCategory,
   updateCategory,
 } from '../src/services/categoryService.js'
 
@@ -93,5 +94,53 @@ describe('分类使用数量与排序', () => {
 
     await moveCategory(moved[0].id, 'up')
     assert.equal((await getAllCategories())[0].id, moved[0].id)
+  })
+})
+
+describe('reorderCategory', () => {
+  const DEFAULT_NAMES = ['生活', '家庭', '健康', '汽车', '工作', '学习', '数码', '其他']
+
+  it('移到首位 / 中位 / 末位，sortOrder 保持 0..7 连续', async () => {
+    const before = await getAllCategories()
+    const other = before.find((category) => category.name === '其他')
+
+    // 末位 → 首位
+    await reorderCategory(other.id, 0)
+    let after = await getAllCategories()
+    assert.deepEqual(after.map((category) => category.name), ['其他', ...DEFAULT_NAMES.slice(0, 7)])
+    assert.deepEqual(after.map((category) => category.sortOrder), [0, 1, 2, 3, 4, 5, 6, 7])
+
+    // 家庭（当前第 2 位）→ 第 5 位
+    await reorderCategory(after[2].id, 5)
+    after = await getAllCategories()
+    assert.deepEqual(after.map((category) => category.name), ['其他', '生活', '健康', '汽车', '工作', '家庭', '学习', '数码'])
+    assert.deepEqual(after.map((category) => category.sortOrder), [0, 1, 2, 3, 4, 5, 6, 7])
+
+    // 其他（首位）→ 末位
+    await reorderCategory(after[0].id, 7)
+    after = await getAllCategories()
+    assert.equal(after.at(-1).name, '其他')
+    assert.deepEqual(after.map((category) => category.sortOrder), [0, 1, 2, 3, 4, 5, 6, 7])
+  })
+
+  it('原位移动为无操作且不更新时间戳', async () => {
+    const before = await getAllCategories()
+    await reorderCategory(before[3].id, 3)
+    const after = await getAllCategories()
+    assert.deepEqual(after.map((category) => category.name), DEFAULT_NAMES)
+    assert.equal(after[3].updatedAt, before[3].updatedAt)
+  })
+
+  it('未知 id 与越界下标被拒绝', async () => {
+    await assert.rejects(reorderCategory('ghost', 0), /分类不存在/)
+
+    const categories = await getAllCategories()
+    await assert.rejects(reorderCategory(categories[0].id, -1), /目标位置无效/)
+    await assert.rejects(reorderCategory(categories[0].id, categories.length), /目标位置无效/)
+    await assert.rejects(reorderCategory(categories[0].id, 1.5), /目标位置无效/)
+
+    // 失败后顺序不变
+    const after = await getAllCategories()
+    assert.deepEqual(after.map((category) => category.name), DEFAULT_NAMES)
   })
 })

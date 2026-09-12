@@ -19,6 +19,13 @@ function formatInterval(days) {
   return `${rounded} 天`
 }
 
+// 偏差展示：正数晚于周期（+N 天），负数早于周期（−N 天）
+function formatSignedDays(days) {
+  if (days == null) return '—'
+  const rounded = Math.round(days)
+  return rounded > 0 ? `+${rounded} 天` : `${rounded} 天`
+}
+
 // 详情页结构固定：名称/分类/最后一次/状态/今天做了/下一次/周期/历史记录/统计/备注/编辑/删除
 export default function ItemDetailPage() {
   const { id } = useParams()
@@ -97,6 +104,7 @@ export default function ItemDetailPage() {
   if (!item) return <div className="page"><DataState empty emptyText="事项不存在或已被删除。" /></div>
 
   const statistics = item.statistics
+  const deviation = statistics.deviation
   const hasIntervals = statistics.eventCount >= 2
 
   return (
@@ -171,12 +179,23 @@ export default function ItemDetailPage() {
           <h2>统计</h2>
         </div>
         {hasIntervals ? (
-          <div className="stats-grid">
-            <div className="stats-item"><strong>{statistics.eventCount}</strong><span>记录次数</span></div>
-            <div className="stats-item"><strong>{formatInterval(statistics.averageInterval)}</strong><span>平均间隔</span></div>
-            <div className="stats-item"><strong>{formatInterval(statistics.maximumInterval)}</strong><span>最长间隔</span></div>
-            <div className="stats-item"><strong>{formatInterval(statistics.minimumInterval)}</strong><span>最短间隔</span></div>
-          </div>
+          <>
+            <div className="stats-grid">
+              <div className="stats-item"><strong>{statistics.eventCount}</strong><span>记录次数</span></div>
+              <div className="stats-item"><strong>{formatInterval(statistics.averageInterval)}</strong><span>平均间隔</span></div>
+              <div className="stats-item"><strong>{formatInterval(statistics.maximumInterval)}</strong><span>最长间隔</span></div>
+              <div className="stats-item"><strong>{formatInterval(statistics.minimumInterval)}</strong><span>最短间隔</span></div>
+              {deviation && (
+                <>
+                  <div className="stats-item"><strong>{deviation.onTimeRate}%</strong><span>准时率</span></div>
+                  <div className="stats-item"><strong>{formatSignedDays(deviation.averageDeviation)}</strong><span>平均偏差</span></div>
+                </>
+              )}
+            </div>
+            {deviation && (
+              <p className="stats-note">准时率：间隔不超过设定周期的比例；偏差为正表示平均晚于周期，为负表示早于。</p>
+            )}
+          </>
         ) : (
           <p className="empty-inline">记录两次以上后可查看间隔统计。</p>
         )}

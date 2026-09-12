@@ -97,17 +97,3 @@ export async function deleteItem(id) {
 export async function getItem(id) {
   return (await db.items.get(id)) ?? null
 }
-
-export async function getAllItems() {
-  return db.items.toArray()
-}
-
-// 文档 API：按 name / note 匹配（分类匹配在 viewModelService.filterItemViewModels 中实现）
-export async function searchItems(keyword) {
-  const query = keyword.trim().toLocaleLowerCase('zh-CN')
-  if (!query) return db.items.toArray()
-  const items = await db.items.toArray()
-  return items.filter((item) =>
-    [item.name, item.note ?? ''].some((text) => text.toLocaleLowerCase('zh-CN').includes(query)),
-  )
-}

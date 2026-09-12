@@ -6,7 +6,6 @@ import {
   createEvent,
   deleteEvent,
   getEventsByItemId,
-  getLatestEvent,
   recordToday,
   updateEvent,
   validateEventInput,
@@ -90,7 +89,7 @@ describe('recordToday', () => {
   })
 })
 
-describe('getEventsByItemId / getLatestEvent', () => {
+describe('getEventsByItemId', () => {
   it('按日期倒序返回', async () => {
     const itemId = await createTestItem()
     await createEvent(itemId, '2026-01-01')
@@ -98,7 +97,6 @@ describe('getEventsByItemId / getLatestEvent', () => {
     await createEvent(itemId, '2026-02-01')
     const events = await getEventsByItemId(itemId)
     assert.deepEqual(events.map((event) => event.eventDate), ['2026-03-01', '2026-02-01', '2026-01-01'])
-    assert.equal((await getLatestEvent(itemId)).eventDate, '2026-03-01')
   })
 })
 

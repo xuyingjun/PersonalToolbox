@@ -26,6 +26,7 @@ export async function ensureDefaultCategories(target = db) {
 // 在 React 渲染之前调用，避免 StrictMode 双执行。
 export async function initDatabase() {
   await db.open()
+  await db.settings.delete('theme') // 清理已废弃的主题设置（旧库遗留）
   await ensureDefaultCategories()
   await db.meta.bulkPut([
     { key: 'schemaVersion', value: SCHEMA_VERSION },

@@ -9,7 +9,8 @@ export const DEFAULT_CATEGORY_ICONS = {
   其他: '📌',
 }
 
-export const CATEGORY_ICON_OPTIONS = ['🍽️', '🏠', '❤️', '🚗', '💼', '📖', '💻', '📌', '🧹', '🩺', '✈️', '🎯']
+// 🏷️ 是服务层与 UI 的默认图标（见 categoryService.createCategory 的默认参数），必须包含在合法选项中
+export const CATEGORY_ICON_OPTIONS = ['🏷️', '🍽️', '🏠', '❤️', '🚗', '💼', '📖', '💻', '📌', '🧹', '🩺', '✈️', '🎯']
 
 export function getCategoryIcon(name, icon) {
   return icon || DEFAULT_CATEGORY_ICONS[name] || '🏷️'

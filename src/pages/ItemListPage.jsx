@@ -12,13 +12,36 @@ import { ITEM_SORTS, filterItemViewModels, sortItemViewModels } from '../service
 
 export default function ItemListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [sortKey, setSortKey] = useState('attention')
   const [message, setMessage] = useState('')
   const { viewModels, today, loading, error } = useItemViewModels()
+
+  // 排序方式持久化在 URL（与搜索词一致），非法值回退默认
+  const sortParam = searchParams.get('sort')
+  const sortKey = ITEM_SORTS.some((sort) => sort.key === sortParam) ? sortParam : 'attention'
 
   const query = searchParams.get('q') ?? ''
   const visibleItems = sortItemViewModels(filterItemViewModels(viewModels ?? [], query), sortKey)
   const isEmpty = !loading && viewModels?.length === 0
+
+  // 函数式更新，避免 q / sort 相互覆盖；默认排序不进 URL 保持干净
+  function handleSortChange(value) {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      if (value === 'attention') next.delete('sort')
+      else next.set('sort', value)
+      return next
+    })
+  }
+
+  function handleSearchChange(value) {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      const keyword = value.trim()
+      if (keyword) next.set('q', keyword)
+      else next.delete('q')
+      return next
+    }, { replace: true })
+  }
 
   async function handleRecord(itemId) {
     try {
@@ -37,11 +60,11 @@ export default function ItemListPage() {
       <div className="list-toolbar">
         <SearchBar
           value={query}
-          onChange={(value) => setSearchParams(value.trim() ? { q: value.trim() } : {}, { replace: true })}
+          onChange={handleSearchChange}
         />
         <label className="select-control">
           <span className="sr-only">排序方式</span>
-          <select value={sortKey} onChange={(event) => setSortKey(event.target.value)}>
+          <select value={sortKey} onChange={(event) => handleSortChange(event.target.value)}>
             {ITEM_SORTS.map((sort) => (
               <option key={sort.key} value={sort.key}>{sort.label}</option>
             ))}

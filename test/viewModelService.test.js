@@ -81,6 +81,20 @@ describe('buildItemViewModels', () => {
     assert.equal(upcoming.statistics.averageInterval, null)
   })
 
+  it('按时率：有周期多记录给出偏差，无周期或记录不足为 null', () => {
+    const viewModels = build()
+    const overdue = viewModels.find((item) => item.id === 'i-overdue')
+    // daily 周期但间隔都是 4 天 → 偏差 +3、准时率 0
+    assert.deepEqual(overdue.statistics.deviation,
+      { pairCount: 2, averageDeviation: 3, latestDeviation: 3, maxDeviation: 3, onTimeRate: 0 })
+
+    const upcoming = viewModels.find((item) => item.id === 'i-upcoming')
+    assert.equal(upcoming.statistics.deviation, null)
+
+    const nocycle = viewModels.find((item) => item.id === 'i-nocycle')
+    assert.equal(nocycle.statistics.deviation, null)
+  })
+
   it('cycle 提供类型/值/中文标签', () => {
     const viewModels = build()
     const overdue = viewModels.find((item) => item.id === 'i-overdue')

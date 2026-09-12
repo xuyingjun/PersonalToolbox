@@ -66,6 +66,26 @@ export async function moveCategory(id, direction) {
   })
 }
 
+// 拖拽排序：把 id 移动到 targetIndex（相对当前 sortOrder 顺序）。
+// 事务内取出全部分类 → 移除 id → 插入目标位 → 按新下标 bulkPut（sortOrder = index）。
+// 未知 id / 越界抛错；原位为无操作。
+export async function reorderCategory(id, targetIndex) {
+  await db.transaction('rw', db.categories, async () => {
+    const categories = await db.categories.orderBy('sortOrder').toArray()
+    const index = categories.findIndex((category) => category.id === id)
+    if (index < 0) throw new Error('分类不存在。')
+    if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= categories.length) {
+      throw new Error('目标位置无效。')
+    }
+    if (index === targetIndex) return
+
+    const now = new Date().toISOString()
+    const [moved] = categories.splice(index, 1)
+    categories.splice(targetIndex, 0, moved)
+    await db.categories.bulkPut(categories.map((category, position) => ({ ...category, sortOrder: position, updatedAt: now })))
+  })
+}
+
 // 被 Item 引用的分类禁止删除（事务内校验，避免遗留悬空引用）。
 export async function deleteCategory(id) {
   const existing = await db.categories.get(id)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CycleSelector from '../components/CycleSelector.jsx'
 import { ArrowLeft, ChevronRight, RotateCcw } from '../components/ui/AppIcon.jsx'
@@ -7,7 +7,9 @@ import { formatCycleLabel } from '../db/schema.js'
 import { useLiveData } from '../hooks/useLiveData.js'
 import { useToday } from '../hooks/useToday.js'
 import { getAllCategories } from '../services/categoryService.js'
+import { getEventsByItemId } from '../services/eventService.js'
 import { createItemWithEvent, getItem, updateItem } from '../services/itemService.js'
+import { recommendCycle } from '../services/statisticsService.js'
 
 const LAST_OPTIONS = [
   { key: 'today', label: '今天' },
@@ -24,6 +26,13 @@ export default function ItemEditPage() {
 
   const { data: categories, loading: categoriesLoading } = useLiveData(() => getAllCategories(), null, [])
   const { data: item, loading: itemLoading } = useLiveData(() => (id ? getItem(id) : Promise.resolve(null)), id, null)
+  const { data: events, error: eventsError } = useLiveData(() => (id ? getEventsByItemId(id) : Promise.resolve([])), id, [])
+
+  // 编辑模式下按历史间隔中位数推荐周期（迁移来的 none 周期事项受益最大）
+  const suggestion = useMemo(() => recommendCycle(events), [events])
+  const showSuggestion = isEdit && suggestion
+    && (suggestion.cycleType !== cycleType
+      || (suggestion.cycleType === 'custom' && suggestion.cycleValue !== cycleValue))
 
   const [name, setName] = useState('')
   const [categoryId, setCategoryId] = useState('')
@@ -151,6 +160,23 @@ export default function ItemEditPage() {
             <ChevronRight size={17} aria-hidden="true" />
           </button>
         </div>
+
+        {eventsError && <p className="form-hint">历史记录读取失败，无法提供周期建议。</p>}
+        {showSuggestion && (
+          <div className="cycle-suggestion">
+            <span>
+              💡 根据 {suggestion.sampleCount} 次历史记录（中位间隔 {Number(suggestion.medianInterval.toFixed(1))} 天），
+              建议周期：{formatCycleLabel(suggestion.cycleType, suggestion.cycleValue)}
+            </span>
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={() => handleCycleSelect({ cycleType: suggestion.cycleType, cycleValue: suggestion.cycleValue })}
+            >
+              应用
+            </button>
+          </div>
+        )}
 
         <label>
           备注

@@ -4,7 +4,7 @@
 import { db } from '../db/db.js'
 import { formatCycleLabel } from '../db/schema.js'
 import { getTodayString } from '../utils/date.js'
-import { calculateStatisticsFromEvents } from './statisticsService.js'
+import { calculateCycleDeviation, calculateStatisticsFromEvents } from './statisticsService.js'
 import {
   DEFAULT_UPCOMING_THRESHOLD,
   STATUS,
@@ -62,7 +62,10 @@ export function buildItemViewModels({ items, events, categories, today = getToda
       status,
       attentionLevel: calculateAttentionLevel(status),
       recordedToday: sortedEvents.some((event) => event.eventDate === today),
-      statistics: calculateStatisticsFromEvents(sortedEvents),
+      statistics: {
+        ...calculateStatisticsFromEvents(sortedEvents),
+        deviation: calculateCycleDeviation({ eventsAsc: sortedEvents, cycleType: item.cycleType, cycleValue: item.cycleValue }),
+      },
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
     }

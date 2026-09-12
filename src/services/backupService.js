@@ -132,6 +132,8 @@ export function validateBackup(backup) {
   if (!isIsoTimestamp(backup.exportedAt)) throw new Error('备份的导出时间格式不正确。')
 
   TABLE_NAMES.forEach((name) => assertArray(backup[name], name))
+  // 旧版备份可能包含已废弃的 theme 设置：原地丢弃，不参与校验与导入
+  backup.settings = backup.settings.filter((record) => record?.key !== 'theme')
   assertUniqueIds(backup.items, 'id', '事项')
   assertUniqueIds(backup.events, 'id', '记录')
   assertUniqueIds(backup.categories, 'id', '分类')

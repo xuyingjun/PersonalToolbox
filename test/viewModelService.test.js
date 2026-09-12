@@ -14,8 +14,8 @@ const TODAY = '2026-09-11'
 const ISO = '2026-09-01T00:00:00.000Z'
 
 const categories = [
-  { id: 'c-life', name: '生活', sortOrder: 0 },
-  { id: 'c-other', name: '其他', sortOrder: 7 },
+  { id: 'c-life', name: '生活', icon: '🍽️', sortOrder: 0 },
+  { id: 'c-other', name: '其他', icon: '📌', sortOrder: 7 },
 ]
 
 const items = [
@@ -52,6 +52,7 @@ describe('buildItemViewModels', () => {
     assert.equal(overdue.elapsedDays, 2)
     assert.equal(overdue.recordedToday, false)
     assert.equal(overdue.category, '生活')
+    assert.equal(overdue.categoryIcon, '🍽️')
 
     const upcoming = viewModels.find((item) => item.id === 'i-upcoming')
     assert.equal(upcoming.nextDate, '2026-09-12')

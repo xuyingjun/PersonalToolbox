@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { getCategoryIcon } from '../constants/categoryIcons.js'
 import { formatNextDate, formatRelativeDays } from '../utils/date.js'
 import StatusBadge from './StatusBadge.jsx'
 
@@ -12,7 +13,7 @@ export default function ItemCard({ item, today, showRecordButton = false, onReco
           <StatusBadge status={item.status} />
         </div>
         <div className="item-card-meta">
-          <span>{item.category}</span>
+          <span>{getCategoryIcon(item.category, item.categoryIcon)} {item.category}</span>
           <span>
             最后一次：
             {item.latestEvent ? formatRelativeDays(item.latestEvent.eventDate, today) : '还没有记录'}

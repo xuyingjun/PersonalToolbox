@@ -1,6 +1,13 @@
 import { Search, X } from './ui/AppIcon.jsx'
 
-export default function SearchBar({ value, onChange, placeholder = '搜索名称、分类或备注', ariaLabel = '搜索事项' }) {
+export default function SearchBar({
+  value,
+  onChange,
+  placeholder = '搜索名称、分类或备注',
+  ariaLabel = '搜索事项',
+  onCompositionStart,
+  onCompositionEnd,
+}) {
   return (
     <label className="search-box">
       <Search aria-hidden="true" size={20} />
@@ -9,6 +16,8 @@ export default function SearchBar({ value, onChange, placeholder = '搜索名称
         type="search"
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        onCompositionStart={onCompositionStart}
+        onCompositionEnd={onCompositionEnd}
         placeholder={placeholder}
       />
       {value && (

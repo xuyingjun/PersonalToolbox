@@ -32,6 +32,7 @@ function compareNames(first, second) {
 // 纯函数：单遍流水线构建全部 ViewModel，便于单元测试。
 export function buildItemViewModels({ items, events, categories, today = getTodayString(), upcomingThreshold = DEFAULT_UPCOMING_THRESHOLD }) {
   const categoryNames = new Map(categories.map((category) => [category.id, category.name]))
+  const categoryIcons = new Map(categories.map((category) => [category.id, category.icon]))
   const eventsByItem = new Map()
   for (const event of events) {
     if (!eventsByItem.has(event.itemId)) eventsByItem.set(event.itemId, [])
@@ -49,6 +50,7 @@ export function buildItemViewModels({ items, events, categories, today = getToda
       id: item.id,
       name: item.name,
       category: categoryNames.get(item.categoryId) ?? '未分类',
+      categoryIcon: categoryIcons.get(item.categoryId),
       categoryId: item.categoryId,
       note: item.note ?? '',
       latestEvent,

@@ -6,6 +6,7 @@ import StatusBadge from '../components/StatusBadge.jsx'
 import { ArrowLeft, CalendarPlus, Check, Pencil, Trash2 } from '../components/ui/AppIcon.jsx'
 import DataState from '../components/ui/DataState.jsx'
 import Modal from '../components/ui/Modal.jsx'
+import { getCategoryIcon } from '../constants/categoryIcons.js'
 import { useLiveData } from '../hooks/useLiveData.js'
 import { useToday } from '../hooks/useToday.js'
 import { deleteEvent, getEventsByItemId, recordToday } from '../services/eventService.js'
@@ -120,7 +121,10 @@ export default function ItemDetailPage() {
       </header>
 
       <div className="detail-summary">
-        <span className="chip">{item.category}</span>
+        <span className="chip">
+          <span aria-hidden="true">{getCategoryIcon(item.category, item.categoryIcon)}</span>
+          {item.category}
+        </span>
         <StatusBadge status={item.status} />
       </div>
 

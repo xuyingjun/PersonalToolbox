@@ -811,6 +811,9 @@ button:disabled {
 }
 
 .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 3px 9px;
   color: var(--color-text-secondary);
   background: var(--surface-pressed);

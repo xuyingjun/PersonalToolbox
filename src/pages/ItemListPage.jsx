@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import EmptyState from '../components/ui/EmptyState.jsx'
 import DataState from '../components/ui/DataState.jsx'
@@ -19,7 +19,18 @@ export default function ItemListPage() {
   const sortParam = searchParams.get('sort')
   const sortKey = ITEM_SORTS.some((sort) => sort.key === sortParam) ? sortParam : 'attention'
 
-  const query = searchParams.get('q') ?? ''
+  // 输入框值以本地 state 为准，URL 仅作镜像。
+  // 若直接用 URL 往返驱动受控输入，setSearchParams 内部的 startTransition 会延迟提交，
+  // React 会在过渡期间把输入框回写成旧值，打断中文输入法组合（拼音字母被直接落盘）。
+  const [inputValue, setInputValue] = useState(() => searchParams.get('q') ?? '')
+
+  // 外部 URL 变化（浏览器前进/后退等）时同步输入框；相同值跳过避免无谓重渲染
+  useEffect(() => {
+    const urlQuery = searchParams.get('q') ?? ''
+    setInputValue((previous) => (urlQuery !== previous ? urlQuery : previous))
+  }, [searchParams])
+
+  const query = inputValue
   const visibleItems = sortItemViewModels(filterItemViewModels(viewModels ?? [], query), sortKey)
   const isEmpty = !loading && viewModels?.length === 0
 
@@ -34,6 +45,7 @@ export default function ItemListPage() {
   }
 
   function handleSearchChange(value) {
+    setInputValue(value)
     setSearchParams((previous) => {
       const next = new URLSearchParams(previous)
       const keyword = value.trim()

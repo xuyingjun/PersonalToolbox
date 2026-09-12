@@ -4,25 +4,16 @@ import EmptyState from '../components/ui/EmptyState.jsx'
 import DataState from '../components/ui/DataState.jsx'
 import Fab from '../components/Fab.jsx'
 import ItemCard from '../components/ItemCard.jsx'
-import SearchBar from '../components/SearchBar.jsx'
 import { RefreshCw } from '../components/ui/AppIcon.jsx'
 import { useItemViewModels } from '../hooks/useItemViewModels.js'
 import { recordToday } from '../services/eventService.js'
 import { sortItemViewModels } from '../services/viewModelService.js'
 
-// 首页定位：打开 App 第一眼就知道哪些事情需要关注。
+// 首页定位：打开 App 第一眼就知道哪些事情需要关注。搜索只在“全部”页提供。
 export default function HomePage() {
   const navigate = useNavigate()
   const { viewModels, today, loading, error } = useItemViewModels()
-  const [query, setQuery] = useState('')
   const [message, setMessage] = useState('')
-
-  // 首页搜索框输入即跳转到“全部”页搜索（单一搜索状态源）
-  function handleSearch(value) {
-    setQuery(value)
-    const keyword = value.trim()
-    navigate(keyword ? `/items?q=${encodeURIComponent(keyword)}` : '/items', { replace: true })
-  }
 
   async function handleRecord(itemId) {
     try {
@@ -56,8 +47,6 @@ export default function HomePage() {
           <span>拾起每一次，记得下一次。</span>
         </div>
       </header>
-
-      <SearchBar value={query} onChange={handleSearch} placeholder="搜索名称、分类或备注" />
 
       {message && <p className="page-message" role="status">{message}</p>}
 
